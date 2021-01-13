@@ -14,22 +14,38 @@ import theme from '../theme'
 import CartFab from '../components/CartFab'
 // services
 import { getMarkets } from '../services/market'
+import { getProductsByCEP } from '../services/products'
 
 const Home = ({ navigation }) => {
   const [deliveryType, setDeliveryType] = useState('all')
   const [loadingMarkets, setLoadingMarkets] = useState(false)
   const [markets, setMarkets] = useState([]);
+  const [products, setProducts] = useState([]);
 
 
   const loadMarkets = useCallback(async () => {
     setLoadingMarkets(true)
-    const response = await getMarkets() 
+    const response = await getMarkets()
     setMarkets(response)
     setLoadingMarkets(false);
   }, [loadingMarkets, getMarkets])
 
+  const loadProducts = useCallback(async () => {
+    setLoadingMarkets(true)
+    const response = await getMarkets()
+    setMarkets(response)
+    setLoadingMarkets(false);
+  }, [loadingMarkets, getMarkets])
+
+  // const loadProducts = async () => {
+  //   const response = await getProductsByCEP(35182362);
+  //   console.log(response)
+  //   setProducts(response);
+  // }
+
   useEffect(() => {
-    loadMarkets()
+    loadMarkets();
+    loadProducts();
   }, [])
 
   const product = {
@@ -43,7 +59,7 @@ const Home = ({ navigation }) => {
     <React.Fragment>
       <StatusBar backgroundColor={theme.palette.primary} />
       <MainNavbar />
-     
+
       <CartFab />
 
       <ScreenContainer>
@@ -51,39 +67,41 @@ const Home = ({ navigation }) => {
           <TouchableWithoutFeedback onPress={() => navigation.navigate('Localizações')}>
             <View style={styles.locationContainer}>
               <Ionicons name="md-locate" size={25} color={theme.palette.primary} />
-              
+
               <View style={styles.locationInfo}>
                 <Typography size="small" color="#000">
                   Avenida Dona Gertrudes, 100
                 </Typography>
               </View>
-              
+
               <Ionicons name="ios-arrow-forward" size={25} color={theme.palette.primary} />
             </View>
           </TouchableWithoutFeedback>
         </ContentContainer>
-        
+
         <Typography size="medium" color="#000">
           Destaques
         </Typography>
 
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.horizontalList}
           horizontal
           showsHorizontalScrollIndicator={false}
         >
-          <ProductItem product={product} />
-          <ProductItem product={product} />
-          <ProductItem product={product} />
-          <ProductItem product={product} />
-          <ProductItem product={product} />
+          {console.log(products)&&products.map(p => {
+            return (
+              <> <div>{p}</div>
+                <ProductItem product={p}></ProductItem>
+              </>
+            )
+          })}
         </ScrollView>
 
         <Typography size="medium" color="#000">
           Perto de você
         </Typography>
 
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.horizontalList}
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -107,24 +125,28 @@ const Home = ({ navigation }) => {
           />
         </ScrollView>
 
-        {loadingMarkets && (
-          <React.Fragment>
-            <MarketItem skeleton />
-            <MarketItem skeleton />
-            <MarketItem skeleton />
-          </React.Fragment>
-        )}
+        {
+          loadingMarkets && (
+            <React.Fragment>
+              <MarketItem skeleton />
+              <MarketItem skeleton />
+              <MarketItem skeleton />
+            </React.Fragment>
+          )
+        }
 
-        {!loadingMarkets && markets.length > 0 && markets.map(market => (
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('Mercado', { market: market })}
-            key={market.IdEmpresa}
-          >
-            <MarketItem market={market} />
-          </TouchableOpacity>
-        ))}
+        {
+          !loadingMarkets && markets.length > 0 && markets.map(market => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Mercado', { market: market })}
+              key={market.IdEmpresa}
+            >
+              <MarketItem market={market} />
+            </TouchableOpacity>
+          ))
+        }
       </ScreenContainer>
-        
+
       {/* </ScreenContainer> */}
     </React.Fragment>
   )
@@ -134,7 +156,7 @@ const styles = StyleSheet.create({
   navbarButton: {
     marginHorizontal: 8
   },
-  
+
   locationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',

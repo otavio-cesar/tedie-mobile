@@ -1,12 +1,12 @@
 import axios from 'axios'
 
-export const urlApi ='http://rcsnet-001-site25.atempurl.com:80'
+export const urlApi ='http://localhost:59618/api/'
 
 const instance = axios.create({
  baseURL: urlApi
 })
 
-export const api = async (showNotification, loadingMsg) => {
+export const api = () => {
   instance.interceptors.response.use(
     response =>
       response,

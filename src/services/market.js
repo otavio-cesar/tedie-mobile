@@ -3,7 +3,6 @@ import Axios from 'axios'
 export const getMarkets = async () => {
   const response = await Axios.get(
     'http://localhost:59618/api/empresas',
-    { headers: { 'Access-Control-Allow-Origin': '*' } },
   )
 
   return response.data
