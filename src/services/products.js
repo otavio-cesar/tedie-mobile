@@ -1,4 +1,3 @@
-import Axios from 'axios'
 import { api, urlApi } from '../services/axios'
 
 export const getProductsByCEP = async (CEP, categoria = "", offset = 0, limite = 999, searchQuery = "") => {
@@ -11,9 +10,9 @@ export const getProductsByCEP = async (CEP, categoria = "", offset = 0, limite =
             name: p.Nome,
             price: p.Preco_De,
             hasOffer: p.Ofertas == null ? false : true,
-            off: '0%'
+            off: '10%'
         }
     });
-
+    
     return produtcs;
 }

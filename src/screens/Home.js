@@ -31,11 +31,9 @@ const Home = ({ navigation }) => {
   }, [loadingMarkets, getMarkets])
 
   const loadProducts = useCallback(async () => {
-    setLoadingMarkets(true)
-    const response = await getMarkets()
-    setMarkets(response)
-    setLoadingMarkets(false);
-  }, [loadingMarkets, getMarkets])
+    const response = await getProductsByCEP(35182362)
+    setProducts(response);
+  })
 
   // const loadProducts = async () => {
   //   const response = await getProductsByCEP(35182362);
@@ -48,11 +46,16 @@ const Home = ({ navigation }) => {
     loadProducts();
   }, [])
 
+  // const product = {
+  //   name: 'Produto',
+  //   price: 'R$ 50,00',
+  //   hasOffer: true,
+  //   off: '10%'
+  // }
+
   const product = {
-    name: 'Produto',
-    price: 'R$ 50,00',
-    hasOffer: true,
-    off: '10%'
+    name: 'Biscoito',
+    price: 4.0, hasOffer: false, off: '10%'
   }
 
   return (
@@ -88,13 +91,9 @@ const Home = ({ navigation }) => {
           horizontal
           showsHorizontalScrollIndicator={false}
         >
-          {console.log(products)&&products.map(p => {
-            return (
-              <> <div>{p}</div>
-                <ProductItem product={p}></ProductItem>
-              </>
-            )
-          })}
+          {products.map(p =>
+            <ProductItem product={p} />
+          )}
         </ScrollView>
 
         <Typography size="medium" color="#000">
