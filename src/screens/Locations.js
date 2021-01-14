@@ -21,13 +21,18 @@ const Locations = ({ navigation }) => {
 
     const locationsResponse = await getLocations()
     setLocations(locationsResponse)
-    
+
     setLocationsLoader(false)
   }, [setLocationsLoader, setLocations, getLocations])
-  
+
   useEffect(() => {
     loadLocations()
   }, [loadLocations])
+
+  function setCEPLocalization(cep) {
+    console.log(cep)
+    // localStorage.setItem('CEPLocalization', cep);
+  }
 
   return (
     <React.Fragment>
@@ -50,15 +55,15 @@ const Locations = ({ navigation }) => {
         <ContentContainer>
           <View style={styles.searchContainer}>
             <Ionicons name="md-search" size={30} color={theme.palette.primary} />
-            <TextInput 
+            <TextInput
               style={styles.textInput}
               value="Digite o endereço"
             />
           </View>
         </ContentContainer>
-        
 
-        <TouchableWithoutFeedback>
+
+        <TouchableWithoutFeedback onPress={() => setCEPLocalization('local')}>
           <ContentContainer background="#fff">
             <View style={styles.getLocationButton}>
               <Ionicons name="md-locate" size={30} color={theme.palette.primary} />
@@ -69,7 +74,7 @@ const Locations = ({ navigation }) => {
 
               <Ionicons name="ios-arrow-forward" size={30} color={theme.palette.primary} />
             </View>
-            
+
           </ContentContainer>
         </TouchableWithoutFeedback>
 
@@ -81,19 +86,20 @@ const Locations = ({ navigation }) => {
           </React.Fragment>
         )}
 
-        {locations.length > 0 && !locationsLoader 
+        {locations.length > 0 && !locationsLoader
           && locations.map(location => (
-            <LocationItem 
+            <LocationItem
               key={`${location.Endereco}-${location.Num}`}
               location={location}
-              onPressEdit={() => navigation.navigate('Localização', { location: location })} 
+              onPressEdit={() => navigation.navigate('Localização', { location: location })}
+              setCEPLocalization={setCEPLocalization}
             />
           )
-        )}
+          )}
 
       </ScreenContainer>
-    </React.Fragment>  
-    
+    </React.Fragment>
+
   )
 }
 

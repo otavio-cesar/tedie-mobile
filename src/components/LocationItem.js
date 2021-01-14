@@ -10,24 +10,37 @@ import Typography from './Typography'
 // theme
 import theme from '../theme'
 
-const LocationItem = ({ onPressEdit, location, skeleton }) => {
+const LocationItem = ({ onPressEdit, location, skeleton, setCEPLocation }) => {
   return (
     <ContentContainer background="#fff">
       {!skeleton && location && (
         <View style={styles.outerContainer}>
-          <Ionicons name="md-pin" size={30} color={theme.palette.primary} /> 
 
-          <View style={styles.infoContainer}>
-            <Typography size="medium" color={theme.palette.dark}>
-              {location.Endereco}, {location.Num}
-            </Typography>
-            <Typography size="small" color={theme.palette.dark}>
-              {location.Bairro}, {location.Cidade} - {location.UF}
-            </Typography>
-          </View>
+          <TouchableOpacity
+            onPress={() => setCEPLocation(location.CEP)}
+            style={{
+              width: '100%',
+              minWidth: '50%',
+              paddingLeft: '25%',
+              flex: 1,
+              flexDirection: 'row'
+            }}
+          >
+            <View style={{ position: 'absolute', left: 0 }}>
+              <Ionicons name="md-pin" size={30} color={theme.palette.primary} />
+            </View>
+            <View style={styles.infoContainer}>
+              <Typography size="medium" color={theme.palette.dark}>
+                {location.Endereco}, {location.Num}
+              </Typography>
+              <Typography size="small" color={theme.palette.dark}>
+                {location.Bairro}, {location.Cidade} - {location.UF}
+              </Typography>
+            </View>
+          </TouchableOpacity>
 
           <View styles={styles.actionsContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               hitSlop={theme.hitSlop}
               onPress={onPressEdit}
             >
@@ -74,7 +87,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   infoContainer: {
-    maxWidth: 200,
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'flex-start',
