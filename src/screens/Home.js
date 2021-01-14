@@ -31,7 +31,9 @@ const Home = ({ navigation }) => {
   }, [loadingMarkets, getMarkets])
 
   const loadProducts = useCallback(async () => {
-    const response = await getProductsByCEP(35182362)
+    const cep = localStorage.getItem('CEPLocalization');
+    console.log(cep);
+    const response = await getProductsByCEP(cep);
     setProducts(response);
   })
 

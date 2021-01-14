@@ -29,9 +29,8 @@ const Locations = ({ navigation }) => {
     loadLocations()
   }, [loadLocations])
 
-  function setCEPLocalization(cep) {
-    console.log(cep)
-    // localStorage.setItem('CEPLocalization', cep);
+  function setCEPLocation(cep) {
+    localStorage.setItem('CEPLocalization', cep);
   }
 
   return (
@@ -63,7 +62,7 @@ const Locations = ({ navigation }) => {
         </ContentContainer>
 
 
-        <TouchableWithoutFeedback onPress={() => setCEPLocalization('local')}>
+        <TouchableOpacity onPress={() => setCEPLocation('local')}>
           <ContentContainer background="#fff">
             <View style={styles.getLocationButton}>
               <Ionicons name="md-locate" size={30} color={theme.palette.primary} />
@@ -76,7 +75,7 @@ const Locations = ({ navigation }) => {
             </View>
 
           </ContentContainer>
-        </TouchableWithoutFeedback>
+        </TouchableOpacity>
 
         {locationsLoader && (
           <React.Fragment>
@@ -92,7 +91,7 @@ const Locations = ({ navigation }) => {
               key={`${location.Endereco}-${location.Num}`}
               location={location}
               onPressEdit={() => navigation.navigate('Localização', { location: location })}
-              setCEPLocalization={setCEPLocalization}
+              setCEPLocation={setCEPLocation}
             />
           )
           )}
