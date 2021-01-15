@@ -21,6 +21,7 @@
     "react": "~16.11.0",
     "react-dom": "~16.11.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-38.0.2.tar.gz",
+    "react-native-easy-toast": "^2.0.0",
     "react-native-gesture-handler": "~1.6.0",
     "react-native-qrcode-svg": "^6.0.6",
     "react-native-ratings": "^7.3.0",

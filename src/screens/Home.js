@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { StyleSheet, View, StatusBar, ScrollView, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
@@ -15,13 +15,16 @@ import CartFab from '../components/CartFab'
 // services
 import { getMarkets } from '../services/market'
 import { getProductsByCEP } from '../services/products'
+import { getLocationByLatLong } from '../services/locations'
+import * as Location from 'expo-location';
 
 const Home = ({ navigation }) => {
   const [deliveryType, setDeliveryType] = useState('all')
   const [loadingMarkets, setLoadingMarkets] = useState(false)
   const [markets, setMarkets] = useState([]);
+  const [localizacao, setLocalizacao] = useState("");
   const [products, setProducts] = useState([]);
-
+  const [isLocalAltered, setLocalAltered] = useState([]);
 
   const loadMarkets = useCallback(async () => {
     setLoadingMarkets(true)
@@ -30,38 +33,57 @@ const Home = ({ navigation }) => {
     setLoadingMarkets(false);
   }, [loadingMarkets, getMarkets])
 
-  const loadProducts = useCallback(async () => {
-    const cep = localStorage.getItem('CEPLocalization');
-    console.log(cep);
-    const response = await getProductsByCEP(cep);
-    setProducts(response);
-  })
+  const loadProducts = async () => {
+    let obj = localStorage.getItem('Localization')
+    const local = JSON.parse(obj);
 
-  // const loadProducts = async () => {
-  //   const response = await getProductsByCEP(35182362);
-  //   console.log(response)
-  //   setProducts(response);
-  // }
+    if (local == undefined || local == "") {
+      (async () => {
+        let { status } = await Location.requestPermissionsAsync();
+        if (status !== 'granted') {
+          setErrorMsg('Permission to access location was denied');
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        const local = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
+        localStorage.setItem("Localization", JSON.stringify(local));
+
+        const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined
+
+        // carrega produtos pela localizacao do gps
+        const response = await getProductsByCEP(cep.replace("-", ""));
+        setProducts(response);
+        setLocalizacao(local);
+      })()
+    } else {
+      // carrega produtos com localizacao do localstorage
+      if (local.CEP != undefined && local.CEP != "") {
+        const response = await getProductsByCEP(local.CEP.replace("-", ""));
+        setProducts(response);
+        setLocalizacao(local);
+      } else {
+        const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined;
+        const response = await getProductsByCEP(cep.replace("-", ""));
+        setProducts(response);
+        setLocalizacao(local);
+      }
+    }
+  }
 
   useEffect(() => {
     loadMarkets();
     loadProducts();
-  }, [])
+  }, []);
 
-  // const product = {
-  //   name: 'Produto',
-  //   price: 'R$ 50,00',
-  //   hasOffer: true,
-  //   off: '10%'
-  // }
-
-  const product = {
-    name: 'Biscoito',
-    price: 4.0, hasOffer: false, off: '10%'
-  }
+  // Quando usuario alterar o endereco na tela 'Locations', atualiza os produtos.
+  useEffect(() => {
+    loadProducts();
+  }, [isLocalAltered])
 
   return (
     <React.Fragment>
+
       <StatusBar backgroundColor={theme.palette.primary} />
       <MainNavbar />
 
@@ -69,13 +91,15 @@ const Home = ({ navigation }) => {
 
       <ScreenContainer>
         <ContentContainer>
-          <TouchableWithoutFeedback onPress={() => navigation.navigate('Localizações')}>
+          <TouchableWithoutFeedback onPress={() => navigation.navigate('Localizações', { setLocalHome: setLocalAltered })}>
             <View style={styles.locationContainer}>
               <Ionicons name="md-locate" size={25} color={theme.palette.primary} />
 
               <View style={styles.locationInfo}>
                 <Typography size="small" color="#000">
-                  Avenida Dona Gertrudes, 100
+                  {localizacao.CEP ? localizacao.Beautify :
+                    localizacao.results ? localizacao.results[0].formatted_address : ""
+                  }
                 </Typography>
               </View>
 
@@ -149,6 +173,8 @@ const Home = ({ navigation }) => {
       </ScreenContainer>
 
       {/* </ScreenContainer> */}
+
+
     </React.Fragment>
   )
 }

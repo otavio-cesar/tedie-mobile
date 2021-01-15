@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react'
+import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { View, Text, StatusBar, TouchableWithoutFeedback, TouchableOpacity, TextInput, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
@@ -10,11 +10,16 @@ import LocationItem from '../components/LocationItem'
 // theme
 import theme from '../theme'
 // services
-import { getLocations } from '../services/locations'
+import { getLocationByLatLong, getLocations } from '../services/locations'
+import Toast, { DURATION } from 'react-native-easy-toast'
+import * as Location from 'expo-location';
 
-const Locations = ({ navigation }) => {
+const Locations = ({ route, navigation }) => {
   const [locationsLoader, setLocationsLoader] = useState(false)
   const [locations, setLocations] = useState([])
+  const toastRef = useRef();
+
+  const { setLocalHome } = route.params;
 
   const loadLocations = useCallback(async () => {
     setLocationsLoader(true)
@@ -29,12 +34,36 @@ const Locations = ({ navigation }) => {
     loadLocations()
   }, [loadLocations])
 
-  function setCEPLocation(cep) {
-    localStorage.setItem('CEPLocalization', cep);
+  function setLocalization(local) {
+    if (local == 'gps') {
+      (async () => {
+        let { status } = await Location.requestPermissionsAsync();
+        if (status !== 'granted') {
+          setErrorMsg('Permission to access location was denied');
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        const address = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
+        localStorage.setItem("Localization", JSON.stringify(address));
+        setLocalHome(JSON.stringify(address))
+        toastRef.current?.show('Endereço selecionado', 2000)
+      })()
+    } else {
+      localStorage.setItem('Localization', JSON.stringify(local));
+      setLocalHome(JSON.stringify(local))
+      toastRef.current?.show('Endereço selecionado', 2000)
+    }
   }
 
   return (
     <React.Fragment>
+
+      <Toast ref={toastRef}
+        style={{ backgroundColor: 'black' }}
+        opacity={0.8}
+        textStyle={{ color: 'white' }} />
+
       <StatusBar backgroundColor={theme.palette.primary} />
       <Navbar
         left={
@@ -61,21 +90,29 @@ const Locations = ({ navigation }) => {
           </View>
         </ContentContainer>
 
-
-        <TouchableOpacity onPress={() => setCEPLocation('local')}>
-          <ContentContainer background="#fff">
-            <View style={styles.getLocationButton}>
-              <Ionicons name="md-locate" size={30} color={theme.palette.primary} />
-
-              <Text>
+        <ContentContainer background="#fff" >
+          <View style={{ flexDirection: 'row', flex: 1 }}>
+            <TouchableOpacity onPress={() => setLocalization('gps')}
+              style={{
+                flex: 1,
+                width: '100%',
+                minWidth: '50%',
+                paddingLeft: '25%',
+                flexDirection: 'row'
+              }}
+            >
+              <View style={{ position: 'absolute', left: 0 }}>
+                <Ionicons name="md-locate" size={30} color={theme.palette.primary} />
+              </View>
+              <Text style={{ paddingLeft: '8px' }}>
                 Usar Localização Atual
               </Text>
-
+            </TouchableOpacity>
+            <View style={{ position: 'absolute', right: 0 }}>
               <Ionicons name="ios-arrow-forward" size={30} color={theme.palette.primary} />
             </View>
-
-          </ContentContainer>
-        </TouchableOpacity>
+          </View>
+        </ContentContainer>
 
         {locationsLoader && (
           <React.Fragment>
@@ -91,13 +128,13 @@ const Locations = ({ navigation }) => {
               key={`${location.Endereco}-${location.Num}`}
               location={location}
               onPressEdit={() => navigation.navigate('Localização', { location: location })}
-              setCEPLocation={setCEPLocation}
+              setLocalization={setLocalization}
             />
           )
           )}
 
       </ScreenContainer>
-    </React.Fragment>
+    </React.Fragment >
 
   )
 }
