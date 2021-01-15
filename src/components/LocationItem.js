@@ -10,14 +10,14 @@ import Typography from './Typography'
 // theme
 import theme from '../theme'
 
-const LocationItem = ({ onPressEdit, location, skeleton, setCEPLocation }) => {
+const LocationItem = ({ onPressEdit, location, skeleton, setLocalization }) => {
   return (
     <ContentContainer background="#fff">
       {!skeleton && location && (
         <View style={styles.outerContainer}>
 
           <TouchableOpacity
-            onPress={() => setCEPLocation(location.CEP)}
+            onPress={() => setLocalization(location)}
             style={{
               width: '100%',
               minWidth: '50%',
