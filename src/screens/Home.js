@@ -35,8 +35,7 @@ const Home = ({ navigation }) => {
   }, [loadingMarkets, getMarketsByLocation])
 
   const loadProducts = async () => {
-    let obj = await AsyncStorage.getItem('Localization')
-    const local = JSON.parse(obj);
+    const local = JSON.parse(await AsyncStorage.getItem('Localization'));
 
     if (local == undefined || local == "") {
       (async () => {

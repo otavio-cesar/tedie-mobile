@@ -14,6 +14,6 @@ export const getProductsByCEP = async (CEP, categoria = "", offset = 0, limite =
             imagem: p.Imagem
         }
     });
-    
+
     return produtcs;
 }
