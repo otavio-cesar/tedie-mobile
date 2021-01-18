@@ -13,10 +13,11 @@ import Pill from '../components/Pill'
 import theme from '../theme'
 import CartFab from '../components/CartFab'
 // services
-import { getMarkets } from '../services/market'
+import { getMarketsByLocation } from '../services/market'
 import { getProductsByCEP } from '../services/products'
 import { getLocationByLatLong } from '../services/locations'
 import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-community/async-storage'
 
 const Home = ({ navigation }) => {
   const [deliveryType, setDeliveryType] = useState('all')
@@ -28,13 +29,13 @@ const Home = ({ navigation }) => {
 
   const loadMarkets = useCallback(async () => {
     setLoadingMarkets(true)
-    const response = await getMarkets()
+    const response = await getMarketsByLocation()
     setMarkets(response)
     setLoadingMarkets(false);
-  }, [loadingMarkets, getMarkets])
+  }, [loadingMarkets, getMarketsByLocation])
 
   const loadProducts = async () => {
-    let obj = localStorage.getItem('Localization')
+    let obj = await AsyncStorage.getItem('Localization')
     const local = JSON.parse(obj);
 
     if (local == undefined || local == "") {
@@ -47,7 +48,7 @@ const Home = ({ navigation }) => {
 
         let location = await Location.getCurrentPositionAsync({});
         const local = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
-        localStorage.setItem("Localization", JSON.stringify(local));
+        await AsyncStorage.setItem("Localization", JSON.stringify(local));
 
         const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined
 
@@ -79,6 +80,7 @@ const Home = ({ navigation }) => {
   // Quando usuario alterar o endereco na tela 'Locations', atualiza os produtos.
   useEffect(() => {
     loadProducts();
+    loadMarkets();
   }, [isLocalAltered])
 
   return (
@@ -117,8 +119,10 @@ const Home = ({ navigation }) => {
           horizontal
           showsHorizontalScrollIndicator={false}
         >
-          {products.map(p =>
-            <ProductItem product={p} />
+          {products.map((p, index) =>
+            <ProductItem
+              product={p}
+              key={index} />
           )}
         </ScrollView>
 

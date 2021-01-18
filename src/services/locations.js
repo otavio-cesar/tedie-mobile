@@ -11,7 +11,7 @@ export const getLocationByLatLong = async (lat, long) => {
 
 export const getLocations = async () => {
   const response = await Axios.get(
-    'http://localhost:59618/api/enderecos'
+    'http://192.168.0.106:59618/api/enderecos'
   )
 
   return response.data

@@ -20,19 +20,19 @@ const MarketItem = ({ market, skeleton }) => {
             <Avatar color={theme.palette.secondary} size={50} />
 
             <View style={styles.infoContainer}>
-              <Box direction="row" justifyContent="center" alignItems="baseline"> 
+              <Box direction="row" justifyContent="center" alignItems="baseline">
                 <Typography size="medium" color="#000">
                   {market.Nome}
                 </Typography>
-                
+
                 <Box direction="row" justifyContent="center" alignItems="center">
                   <Typography size="medium" color={theme.palette.secondary}>
                     {market.Score.toFixed(1).toString().replace('.', ',')}
                   </Typography>
                   <Ionicons name="md-star" size={25} color={theme.palette.secondary} />
-                </Box> 
+                </Box>
               </Box>
-              
+
               <Typography size="small" color="#000">
                 {market.Endereco}, {market.Num}
               </Typography>
@@ -41,7 +41,7 @@ const MarketItem = ({ market, skeleton }) => {
               </Typography>
             </View>
           </View>
-          
+
           <Ionicons name="ios-arrow-forward" size={25} color={theme.palette.primary} />
         </View>
       )}
@@ -52,17 +52,23 @@ const MarketItem = ({ market, skeleton }) => {
             containerStyle={{ flexDirection: 'row', justifyContent: 'flex-start' }}
             isLoading={skeleton}
             layout={[
-              { key: 0, width: 50, height: 50, borderRadius: 100 },
+              { width: 50, height: 50, borderRadius: 100 },
             ]}
           />
           <SkeletonContent
             containerStyle={{ flexDirection: 'column', alignItems: 'flex-start', marginLeft: 8 }}
             isLoading={skeleton}
-            layout={[
-              { key: 0, width: 200, height: 15, marginBottom: 24 },
-              { key: 1, width: 120, height: 15, marginBottom: 8 },
-              { key: 2, width: 150, height: 15 }
-            ]}
+            layout={[{ width: 200, height: 15, marginBottom: 24 },]}
+          />
+          <SkeletonContent
+            containerStyle={{ flexDirection: 'column', alignItems: 'flex-start', marginLeft: 8 }}
+            isLoading={skeleton}
+            layout={[{ width: 120, height: 15, marginBottom: 8 },]}
+          />
+          <SkeletonContent
+            containerStyle={{ flexDirection: 'column', alignItems: 'flex-start', marginLeft: 8 }}
+            isLoading={skeleton}
+            layout={[{ width: 150, height: 15 }]}
           />
         </Box>
       )}
@@ -71,7 +77,7 @@ const MarketItem = ({ market, skeleton }) => {
 }
 
 const styles = StyleSheet.create({
-  container : {
+  container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center'

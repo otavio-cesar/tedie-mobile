@@ -13,6 +13,7 @@ import theme from '../theme'
 import { getLocationByLatLong, getLocations } from '../services/locations'
 import Toast, { DURATION } from 'react-native-easy-toast'
 import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-community/async-storage'
 
 const Locations = ({ route, navigation }) => {
   const [locationsLoader, setLocationsLoader] = useState(false)
@@ -34,7 +35,7 @@ const Locations = ({ route, navigation }) => {
     loadLocations()
   }, [loadLocations])
 
-  function setLocalization(local) {
+  async function setLocalization(local) {
     if (local == 'gps') {
       (async () => {
         let { status } = await Location.requestPermissionsAsync();
@@ -45,12 +46,12 @@ const Locations = ({ route, navigation }) => {
 
         let location = await Location.getCurrentPositionAsync({});
         const address = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
-        localStorage.setItem("Localization", JSON.stringify(address));
+        await AsyncStorage.setItem("Localization", JSON.stringify(address));
         setLocalHome(JSON.stringify(address))
         toastRef.current?.show('Endereço selecionado', 2000)
       })()
     } else {
-      localStorage.setItem('Localization', JSON.stringify(local));
+      await AsyncStorage.setItem('Localization', JSON.stringify(local));
       setLocalHome(JSON.stringify(local))
       toastRef.current?.show('Endereço selecionado', 2000)
     }
@@ -104,7 +105,7 @@ const Locations = ({ route, navigation }) => {
               <View style={{ position: 'absolute', left: 0 }}>
                 <Ionicons name="md-locate" size={30} color={theme.palette.primary} />
               </View>
-              <Text style={{ paddingLeft: '8px' }}>
+              <Text style={{ paddingLeft: 8 }}>
                 Usar Localização Atual
               </Text>
             </TouchableOpacity>

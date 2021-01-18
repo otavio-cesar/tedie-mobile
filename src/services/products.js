@@ -10,7 +10,8 @@ export const getProductsByCEP = async (CEP, categoria = "", offset = 0, limite =
             name: p.Nome,
             price: p.Preco_De,
             hasOffer: p.Ofertas == null ? false : true,
-            off: '10%'
+            off: '10%',
+            imagem: p.Imagem
         }
     });
     
