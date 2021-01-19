@@ -14,12 +14,6 @@ import CategoryItem from '../components/CategoryItem'
 import { getProducts } from '../services/market'
 
 const Market = ({ navigation, route }) => {
-  const product = {
-    name: 'Produto',
-    price: 'R$ 50,00',
-    hasOffer: true,
-    off: '10%'
-  }
 
   const categories = [
     { name: 'Açougue' },
@@ -76,11 +70,18 @@ const Market = ({ navigation, route }) => {
           horizontal
           showsHorizontalScrollIndicator={false}
         >
-          {marketProducts.filter(p => p.hasOffer).map((p, index) =>
-            <ProductItem
-              product={p}
-              key={index} />
-          )}
+          {marketProducts.filter(p => p.hasOffer).map((p, index) => {
+            return (
+              <TouchableOpacity
+                key={product.Id}
+                onPress={() => navigation.navigate("Produto", { product: product })}
+              >
+                <ProductItem
+                  product={p}
+                  key={index} />
+              </TouchableOpacity>
+            )
+          })}
         </ScrollView>
 
         {/* <Typography size="large" color={theme.palette.dark}>
@@ -108,12 +109,9 @@ const Market = ({ navigation, route }) => {
               <ProductItem product={product} />
             </TouchableOpacity>
           ))}
-
-
         </View>
-
       </ScreenContainer>
-    </React.Fragment>
+    </React.Fragment >
 
   )
 }
