@@ -1,24 +1,73 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { StyleSheet, FlatList, View, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
 import MainNavbar from '../components/MainNavbar'
 import Typography from '../components/Typography'
 import ProductItem from '../components/ProductItem'
+import AsyncStorage from '@react-native-community/async-storage'
+import { getProductsByCEP } from '../services/products'
+import { getLocationByLatLong } from '../services/locations'
 
 const Deals = ({ navigation }) => {
-  const products = [
-    { name: 'Produto 01', price: 'R$ 50,35', hasOffer: true, off: '10%' },
-    { name: 'Produto 02', price: 'R$ 23,50', hasOffer: true, off: '20%' },
-    { name: 'Produto 03', price: 'R$ 79,99', hasOffer: true, off: '30%' },
-    { name: 'Produto 04', price: 'R$ 25,99', hasOffer: true, off: '15%' },
-    { name: 'Produto 05', price: 'R$ 43,50', hasOffer: true, off: '5%' },
-    { name: 'Produto 06', price: 'R$ 54,40', hasOffer: true, off: '7%' },
-    { name: 'Produto 07', price: 'R$ 89,99' },
-    { name: 'Produto 08', price: 'R$ 87,70' },
-    { name: 'Produto 09', price: 'R$ 41,20' },
-    { name: 'Produto 10', price: 'R$ 43,50' }
-  ]
+  // const products = [
+  //   { name: 'Produto 01', price: 'R$ 50,35', hasOffer: true, off: '10%' },
+  //   { name: 'Produto 02', price: 'R$ 23,50', hasOffer: true, off: '20%' },
+  //   { name: 'Produto 03', price: 'R$ 79,99', hasOffer: true, off: '30%' },
+  //   { name: 'Produto 04', price: 'R$ 25,99', hasOffer: true, off: '15%' },
+  //   { name: 'Produto 05', price: 'R$ 43,50', hasOffer: true, off: '5%' },
+  //   { name: 'Produto 06', price: 'R$ 54,40', hasOffer: true, off: '7%' },
+  //   { name: 'Produto 07', price: 'R$ 89,99' },
+  //   { name: 'Produto 08', price: 'R$ 87,70' },
+  //   { name: 'Produto 09', price: 'R$ 41,20' },
+  //   { name: 'Produto 10', price: 'R$ 43,50' }
+  // ]
+
+  const [products, setProducts] = useState([]);
+  const [localizacao, setLocalizacao] = useState("");
+
+  const loadProducts = async () => {
+    let obj = await AsyncStorage.getItem('Localization')
+    const local = JSON.parse(obj);
+
+    if (local == undefined || local == "") {
+      await (async () => {
+        let { status } = await Location.requestPermissionsAsync();
+        if (status !== 'granted') {
+          setErrorMsg('Permission to access location was denied');
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        const local = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
+        await AsyncStorage.setItem("Localization", JSON.stringify(local));
+
+        const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined
+
+        // carrega produtos pela localizacao do gps
+        const response = await getProductsByCEP(cep.replace("-", ""));
+        setProducts(response);
+        setLocalizacao(local);
+      })()
+    } else {
+      // carrega produtos com localizacao do localstorage
+      if (local.CEP != undefined && local.CEP != "") {
+        const response = await getProductsByCEP(local.CEP.replace("-", ""));
+        setProducts(response);
+        setLocalizacao(local);
+      } else {
+        const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined;
+        const response = await getProductsByCEP(cep.replace("-", ""));
+        setProducts(response);
+        setLocalizacao(local);
+      }
+    }
+  }
+
+  useEffect(() => {
+    loadProducts();
+    setProducts(products.filter(p => p.IdCategoria == categoriaId))
+  }, []);
 
   return (
     <React.Fragment>
