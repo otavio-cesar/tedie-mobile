@@ -11,7 +11,8 @@ export const getProductsByCEP = async (CEP, categoria = "", offset = 0, limite =
             price: p.Preco_De,
             hasOffer: p.Ofertas == null ? false : true,
             off: '10%',
-            imagem: p.Imagem
+            imagem: p.Imagem,
+            ...p
         }
     });
     

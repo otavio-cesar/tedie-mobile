@@ -119,7 +119,7 @@ const Home = ({ navigation }) => {
           horizontal
           showsHorizontalScrollIndicator={false}
         >
-          {products.map((p, index) =>
+          {products.filter(p => p.hasOffer).map((p, index) =>
             <ProductItem
               product={p}
               key={index} />

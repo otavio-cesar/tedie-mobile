@@ -5,7 +5,7 @@ import MainNavbar from '../components/MainNavbar'
 import Typography from '../components/Typography'
 import CategoryItem from '../components/CategoryItem'
 // services
-import { getCategories } from '../services/categories' 
+import { getCategories } from '../services/categories'
 
 const Categories = ({ navigation }) => {
   const [categoriesLoader, setCategoriesLoader] = useState(false)
@@ -27,18 +27,18 @@ const Categories = ({ navigation }) => {
   return (
     <React.Fragment>
       <MainNavbar />
-      
+
       <View style={styles.container}>
         <Typography size="medium" color="#000">
           Categorias
         </Typography>
 
-        <FlatList 
+        <FlatList
           data={categories}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => navigation.navigate('Produtos')} >
-              <CategoryItem 
-                category={item} 
+            <TouchableOpacity onPress={() => navigation.navigate('Produtos', { categoriaId: item.IdCategoria })} >
+              <CategoryItem
+                category={item}
               />
             </TouchableOpacity>
           )}
@@ -47,13 +47,13 @@ const Categories = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
         />
       </View>
-        
+
     </React.Fragment>
   )
 }
 
 const styles = StyleSheet.create({
-  container : {
+  container: {
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',

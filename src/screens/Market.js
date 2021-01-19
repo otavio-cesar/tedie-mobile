@@ -71,16 +71,16 @@ const Market = ({ navigation, route }) => {
           Destaques
         </Typography>
 
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.horizontalList}
           horizontal
           showsHorizontalScrollIndicator={false}
         >
-          <ProductItem product={product} />
-          <ProductItem product={product} />
-          <ProductItem product={product} />
-          <ProductItem product={product} />
-          <ProductItem product={product} />
+          {marketProducts.filter(p => p.hasOffer).map((p, index) =>
+            <ProductItem
+              product={p}
+              key={index} />
+          )}
         </ScrollView>
 
         {/* <Typography size="large" color={theme.palette.dark}>
@@ -98,18 +98,18 @@ const Market = ({ navigation, route }) => {
         <Typography size="large" color={theme.palette.dark}>
           Produtos
         </Typography>
-        
+
         <View style={styles.categoriesContainer}>
           {!loadingProducts && marketProducts.length > 0 && marketProducts.map(product => (
-            <TouchableOpacity 
-              key={product.Id} 
+            <TouchableOpacity
+              key={product.Id}
               onPress={() => navigation.navigate("Produto", { product: product })}
             >
               <ProductItem product={product} />
             </TouchableOpacity>
           ))}
 
-          
+
         </View>
 
       </ScreenContainer>
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 16
   },
-  categoriesContainer : {
+  categoriesContainer: {
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',

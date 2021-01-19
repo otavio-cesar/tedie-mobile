@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { StyleSheet, View, TouchableOpacity, Text, ScrollView } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, Text, ScrollView, Image } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
 import ScreenContainer from '../components/ScreenContainer'
@@ -41,7 +41,7 @@ const Product = ({ navigation, route }) => {
 
   return (
     <React.Fragment>
-      <Navbar 
+      <Navbar
         left={
           <TouchableOpacity hitSlop={theme.hitSlop} onPress={() => navigation.pop()}>
             <Ionicons name="md-arrow-back" size={30} color="#fff" />
@@ -55,14 +55,22 @@ const Product = ({ navigation, route }) => {
             {/* <Typography size="small" color="#fff">
               Big Bom
             </Typography> */}
-          </View>  
+          </View>
         }
       />
 
+
       <ScreenContainer>
         <View style={styles.container}>
-          <View style={styles.imageContainer} />
-
+          <View style={styles.imageContainer} >
+            <Image
+              resizeMode={'center'} //
+              style={{ width: '100%', height: '100%' }}
+              source={{
+                uri: product.imagem,
+              }}
+            />
+          </View>
           <Typography size="large" color="#000">
             {product.Nome}
           </Typography>
@@ -79,12 +87,12 @@ const Product = ({ navigation, route }) => {
                   Sem descrição disponível
                 </Typography>
               )}
-            </React.Fragment>            
+            </React.Fragment>
           </View>
 
           <View style={styles.priceContainer}>
             <Typography size="medium" color="#000">
-              por R$ {productValue.toFixed(2).toString().replace('.', ',')}
+              por R$ {(productValue ?? 0)?.toFixed(2).toString().replace('.', ',')}
             </Typography>
           </View>
 
@@ -92,7 +100,7 @@ const Product = ({ navigation, route }) => {
             Compre também
           </Typography>
 
-          <ScrollView 
+          <ScrollView
             contentContainerStyle={styles.horizontalList}
             horizontal
           >
@@ -111,21 +119,21 @@ const Product = ({ navigation, route }) => {
             <Ionicons name="md-remove" size={30} color={theme.palette.primary} />
           </TouchableOpacity>
 
-          <Text style={styles.quantity}>{ quantity }</Text>
+          <Text style={styles.quantity}>{quantity}</Text>
 
           <TouchableOpacity hitSlop={theme.hitSlop} onPress={() => handleAdd(quantity)}>
             <Ionicons name="md-add" size={30} color={theme.palette.primary} />
           </TouchableOpacity>
         </View>
 
-        <Button 
+        <Button
           background={theme.palette.secondary}
           color={theme.palette.primary}
           width="50%"
           text={`Adicionar R$${productTotal.toFixed(2).toString().replace('.', ',')}`}
         />
       </View>
-    </React.Fragment>
+    </React.Fragment >
   )
 }
 
@@ -145,7 +153,7 @@ const styles = StyleSheet.create({
     height: 250,
     backgroundColor: '#fff',
     borderRadius: 8,
-    marginVertical: 16 
+    marginVertical: 16
   },
 
   descriptionContainer: {

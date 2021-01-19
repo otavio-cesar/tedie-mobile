@@ -12,7 +12,7 @@ export const getMarkets = async () => {
 export const getMarketsByLocation = async () => {
   const local = JSON.parse(await AsyncStorage.getItem('Localization'));
   const cep = local.CEP || (local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined);
-  
+
   const response = await Axios.get(
     `http://192.168.0.106:59618/api/empresas/GetListaEmpresaByCEP?CEP=${cep.replace('-', '')}`,
   )
@@ -33,7 +33,18 @@ export const getProducts = async (token, marketId) => {
     `http://192.168.0.106:59618/api/produtos/?token=${token}&Idempresa=${marketId}`
   )
 
-  return response.data
+  const produtcs = response.data.map(p => {
+    return {
+      name: p.Nome,
+      price: p.Preco_De,
+      hasOffer: p.Ofertas == null ? false : true,
+      off: '10%',
+      imagem: p.Imagem,
+      ...p
+    }
+  });
+
+  return produtcs;
 }
 
 export const getProduct = async (token, marketId, productId) => {

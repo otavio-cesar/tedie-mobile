@@ -17,14 +17,14 @@ const ProductItem = ({ product, skeleton }) => {
   const handleAdd = (quantity) => {
     setQuantity(quantity + 1)
   }
-  
+
   return (
     <View style={styles.container}>
       <ContentContainer>
         {product.hasOffer && (
           <View style={styles.offerContainer}>
             <Typography size="small" color="#fff">
-              { product.off }
+              {product.off}
             </Typography>
           </View>
         )}
@@ -44,16 +44,16 @@ const ProductItem = ({ product, skeleton }) => {
         )}
 
         <View style={styles.quantityContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             hitSlop={theme.hitSlop}
             onPress={() => handleRemove(quantity)}
           >
             <Ionicons name="md-remove" size={25} color={theme.palette.primary} />
           </TouchableOpacity>
 
-          <Text style={styles.quantity}>{ quantity }</Text>
+          <Text style={styles.quantity}>{quantity}</Text>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             hitSlop={theme.hitSlop}
             onPress={() => handleAdd(quantity)}
           >
@@ -61,10 +61,10 @@ const ProductItem = ({ product, skeleton }) => {
           </TouchableOpacity>
         </View>
       </ContentContainer>
-      
+
       <View style={styles.textContainer}>
         <Typography size="small" color="#000" wrap>
-          { product.Nome }
+          {product.Nome}
         </Typography>
       </View>
 
@@ -73,7 +73,7 @@ const ProductItem = ({ product, skeleton }) => {
       </Typography> */}
 
       <Typography size="small" color="#000">
-        R$ { product.Preco_Por }
+        R$ {(product.Preco_Por ? product.Preco_Por : product.Preco_De ?? 0).toFixed(2).toString().replace('.', ',')}
       </Typography>
     </View>
   )
@@ -118,7 +118,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: -16,
-    elevation: 2
+    elevation: 2,
+    zIndex: 5
   },
 
   textContainer: {
