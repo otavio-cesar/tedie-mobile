@@ -1,6 +1,10 @@
+import { createContext } from "react";
+
+export const AppContext = createContext();
+
 export const appReducer = (state, action) => {
     switch (action.type) {
-        case 'getEndereco':
+        case 'createAddress':
             return { endereco: action.payload }
         case 'getToken':
             return { token: action.payload }
@@ -11,5 +15,5 @@ export const appReducer = (state, action) => {
 
 export const initialState = {
     token: undefined,
-    endereco: undefined
+    address: undefined
 }

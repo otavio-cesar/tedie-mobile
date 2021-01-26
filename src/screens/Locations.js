@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState, useRef } from 'react'
+import React, { useEffect, useCallback, useState, useRef, useContext } from 'react'
 import { View, Text, StatusBar, TouchableWithoutFeedback, TouchableOpacity, TextInput, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
@@ -14,8 +14,10 @@ import { getLocationByLatLong, getLocations } from '../services/locations'
 import Toast, { DURATION } from 'react-native-easy-toast'
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-community/async-storage'
+import { AppContext } from '../contexts/AppContext'
 
 const Locations = ({ route, navigation }) => {
+  const [state, dispatch] = useContext(AppContext);
   const [locationsLoader, setLocationsLoader] = useState(false)
   const [locations, setLocations] = useState([])
   const toastRef = useRef();
@@ -47,11 +49,19 @@ const Locations = ({ route, navigation }) => {
         let location = await Location.getCurrentPositionAsync({});
         const address = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
         await AsyncStorage.setItem("Localization", JSON.stringify(address));
-        setLocalHome(JSON.stringify(address))
+        setLocalHome(JSON.stringify(address));
+
+        const action = { type: "createAddress", palyload: address };
+        dispatch(action);
+
         toastRef.current?.show('Endereço selecionado', 2000)
       })()
     } else {
       await AsyncStorage.setItem('Localization', JSON.stringify(local));
+
+      const action = { type: "createAddress", palyload: local };
+      dispatch(action);
+      
       setLocalHome(JSON.stringify(local))
       toastRef.current?.show('Endereço selecionado', 2000)
     }

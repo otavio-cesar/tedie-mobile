@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useContext } from 'react'
 import { StyleSheet, View, StatusBar, ScrollView, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
@@ -18,8 +18,10 @@ import { getProductsByCEP } from '../services/products'
 import { getLocationByLatLong } from '../services/locations'
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-community/async-storage'
+import { AppContext } from '../contexts/AppContext'
 
 const Home = ({ navigation }) => {
+  const [state, dispatch] = useContext(AppContext);
   const [deliveryType, setDeliveryType] = useState('all')
   const [loadingMarkets, setLoadingMarkets] = useState(false)
   const [markets, setMarkets] = useState([]);
@@ -35,7 +37,7 @@ const Home = ({ navigation }) => {
   }, [loadingMarkets, getMarketsByLocation])
 
   const loadProducts = async () => {
-    const local = JSON.parse(await AsyncStorage.getItem('Localization'));
+    const local = state.address;
 
     if (local == undefined || local == "") {
       (async () => {
@@ -70,6 +72,43 @@ const Home = ({ navigation }) => {
       }
     }
   }
+
+  // const loadProducts = async () => {
+  //   const local = JSON.parse(await AsyncStorage.getItem('Localization'));
+
+  //   if (local == undefined || local == "") {
+  //     (async () => {
+  //       let { status } = await Location.requestPermissionsAsync();
+  //       if (status !== 'granted') {
+  //         setErrorMsg('Permission to access location was denied');
+  //         return;
+  //       }
+
+  //       let location = await Location.getCurrentPositionAsync({});
+  //       const local = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
+  //       await AsyncStorage.setItem("Localization", JSON.stringify(local));
+
+  //       const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined
+
+  //       // carrega produtos pela localizacao do gps
+  //       const response = await getProductsByCEP(cep.replace("-", ""));
+  //       setProducts(response);
+  //       setLocalizacao(local);
+  //     })()
+  //   } else {
+  //     // carrega produtos com localizacao do localstorage
+  //     if (local.CEP != undefined && local.CEP != "") {
+  //       const response = await getProductsByCEP(local.CEP.replace("-", ""));
+  //       setProducts(response);
+  //       setLocalizacao(local);
+  //     } else {
+  //       const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined;
+  //       const response = await getProductsByCEP(cep.replace("-", ""));
+  //       setProducts(response);
+  //       setLocalizacao(local);
+  //     }
+  //   }
+  // }
 
   useEffect(() => {
     loadMarkets();
