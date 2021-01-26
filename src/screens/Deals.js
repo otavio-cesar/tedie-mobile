@@ -82,7 +82,7 @@ const Deals = ({ navigation }) => {
           data={products}
           renderItem={({ item }) => {
             return item.hasOffer && (
-              <TouchableOpacity onPress={() => navigation.navigate('Produto')}>
+              <TouchableOpacity onPress={() => navigation.navigate('Produto', { product: item })}>
                 <ProductItem product={item} />
               </TouchableOpacity>
             )
