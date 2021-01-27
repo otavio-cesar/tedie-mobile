@@ -6,15 +6,15 @@ export const getProductsByCEP = async (CEP, categoria = "", offset = 0, limite =
     );
 
     const produtcs = response.data.map(p => {
-        return {
-            name: p.Nome,
-            price: p.Preco_De,
-            hasOffer: p.Ofertas == null ? false : true,
-            off: '10%',
-            imagem: p.Imagem,
-            ...p
-        }
-    });
+            return {
+                name: p.Nome,
+                price: p.Preco_De,
+                hasOffer: p.Ofertas == null ? false : true,
+                off: '10%',
+                imagem: p.Imagem,
+                ...p
+            }
+        });
 
     return produtcs;
 }

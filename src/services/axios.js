@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const urlApi ='http://localhost:59618/api/'
+export const urlApi ='http://tedie.azurewebsites.net/'
 
 const instance = axios.create({
  baseURL: urlApi

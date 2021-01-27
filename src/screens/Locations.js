@@ -17,7 +17,7 @@ import AsyncStorage from '@react-native-community/async-storage'
 import { AppContext } from '../contexts/AppContext'
 
 const Locations = ({ route, navigation }) => {
-  const [state, dispatch] = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
   const [locationsLoader, setLocationsLoader] = useState(false)
   const [locations, setLocations] = useState([])
   const toastRef = useRef();
@@ -49,9 +49,8 @@ const Locations = ({ route, navigation }) => {
         let location = await Location.getCurrentPositionAsync({});
         const address = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
         await AsyncStorage.setItem("Localization", JSON.stringify(address));
-        setLocalHome(JSON.stringify(address));
 
-        const action = { type: "createAddress", palyload: address };
+        const action = { type: "createAddress", payload: address };
         dispatch(action);
 
         toastRef.current?.show('Endereço selecionado', 2000)
@@ -59,10 +58,9 @@ const Locations = ({ route, navigation }) => {
     } else {
       await AsyncStorage.setItem('Localization', JSON.stringify(local));
 
-      const action = { type: "createAddress", palyload: local };
+      const action = { type: "createAddress", payload: local };
       dispatch(action);
-      
-      setLocalHome(JSON.stringify(local))
+
       toastRef.current?.show('Endereço selecionado', 2000)
     }
   }

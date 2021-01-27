@@ -11,7 +11,7 @@ export const getLocationByLatLong = async (lat, long) => {
 
 export const getLocations = async () => {
   const response = await Axios.get(
-    'http://localhost:59618/api/enderecos'
+    'http://tedie.azurewebsites.net/enderecos'
   )
 
   return response.data

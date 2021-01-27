@@ -21,7 +21,7 @@ import AsyncStorage from '@react-native-community/async-storage'
 import { AppContext } from '../contexts/AppContext'
 
 const Home = ({ navigation }) => {
-  const [state, dispatch] = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
   const [deliveryType, setDeliveryType] = useState('all')
   const [loadingMarkets, setLoadingMarkets] = useState(false)
   const [markets, setMarkets] = useState([]);
@@ -29,97 +29,63 @@ const Home = ({ navigation }) => {
   const [products, setProducts] = useState([]);
   const [isLocalAltered, setLocalAltered] = useState([]);
 
-  const loadMarkets = useCallback(async () => {
+  const loadMarkets = async () => {
     setLoadingMarkets(true)
-    const response = await getMarketsByLocation()
+    const response = await getMarketsByLocation(state.address)
     setMarkets(response)
     setLoadingMarkets(false);
-  }, [loadingMarkets, getMarketsByLocation])
+  }
 
   const loadProducts = async () => {
     const local = state.address;
-
-    if (local == undefined || local == "") {
-      (async () => {
-        let { status } = await Location.requestPermissionsAsync();
-        if (status !== 'granted') {
-          setErrorMsg('Permission to access location was denied');
-          return;
-        }
-
-        let location = await Location.getCurrentPositionAsync({});
-        const local = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
-        await AsyncStorage.setItem("Localization", JSON.stringify(local));
-
-        const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined
-
-        // carrega produtos pela localizacao do gps
-        const response = await getProductsByCEP(cep.replace("-", ""));
-        setProducts(response);
-        setLocalizacao(local);
-      })()
+    // carrega produtos com localizacao do localstorage
+    if (local.CEP != undefined && local.CEP != "") {
+      const response = await getProductsByCEP(local.CEP.replace("-", ""));
+      setProducts(response);
     } else {
-      // carrega produtos com localizacao do localstorage
-      if (local.CEP != undefined && local.CEP != "") {
-        const response = await getProductsByCEP(local.CEP.replace("-", ""));
-        setProducts(response);
-        setLocalizacao(local);
-      } else {
-        const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined;
+      try {
+        const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? "";
         const response = await getProductsByCEP(cep.replace("-", ""));
         setProducts(response);
-        setLocalizacao(local);
+      } catch (e) {
+        console.log(e)
+        debugger
       }
     }
   }
 
-  // const loadProducts = async () => {
-  //   const local = JSON.parse(await AsyncStorage.getItem('Localization'));
+  async function askLocalizationPermission() {
+    (async () => {
+      let { status } = await Location.requestPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      const local = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
+      await AsyncStorage.setItem("Localization", JSON.stringify(local));
 
-  //   if (local == undefined || local == "") {
-  //     (async () => {
-  //       let { status } = await Location.requestPermissionsAsync();
-  //       if (status !== 'granted') {
-  //         setErrorMsg('Permission to access location was denied');
-  //         return;
-  //       }
+      const action = { type: "createAddress", payload: local };
+      dispatch(action);
+    })()
+  }
 
-  //       let location = await Location.getCurrentPositionAsync({});
-  //       const local = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
-  //       await AsyncStorage.setItem("Localization", JSON.stringify(local));
-
-  //       const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined
-
-  //       // carrega produtos pela localizacao do gps
-  //       const response = await getProductsByCEP(cep.replace("-", ""));
-  //       setProducts(response);
-  //       setLocalizacao(local);
-  //     })()
-  //   } else {
-  //     // carrega produtos com localizacao do localstorage
-  //     if (local.CEP != undefined && local.CEP != "") {
-  //       const response = await getProductsByCEP(local.CEP.replace("-", ""));
-  //       setProducts(response);
-  //       setLocalizacao(local);
-  //     } else {
-  //       const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? undefined;
-  //       const response = await getProductsByCEP(cep.replace("-", ""));
-  //       setProducts(response);
-  //       setLocalizacao(local);
-  //     }
-  //   }
-  // }
+  async function loadAll() {
+    if (state.address) {
+      loadMarkets();
+      loadProducts();
+    } else {
+      askLocalizationPermission();
+    }
+  }
 
   useEffect(() => {
-    loadMarkets();
-    loadProducts();
+    loadAll();
+  }, [state.address])
+
+  useEffect(() => {
+    loadAll();
   }, []);
-
-  // Quando usuario alterar o endereco na tela 'Locations', atualiza os produtos.
-  useEffect(() => {
-    loadProducts();
-    loadMarkets();
-  }, [isLocalAltered])
 
   return (
     <React.Fragment>
@@ -137,8 +103,10 @@ const Home = ({ navigation }) => {
 
               <View style={styles.locationInfo}>
                 <Typography size="small" color="#000">
-                  {localizacao.CEP ? localizacao.Beautify :
-                    localizacao.results ? localizacao.results[0].formatted_address : ""
+                  {state.address
+                    ?
+                    (state.address.CEP ? state.address.Beautify : state.address.results ? state.address.results[0].formatted_address : "")
+                    : ""
                   }
                 </Typography>
               </View>

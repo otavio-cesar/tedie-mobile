@@ -7,8 +7,7 @@ import Navigation from './src/navigation'
 import {
   getTokenData
 } from './src/services'
-import { AppContext } from './src/contexts/AppContext'
-import { appReducer, initialState } from './src/contexts/user'
+import { AppContext, appReducer, initialState } from './src/contexts/AppContext'
 
 export default function App() {
   const [state, dispatch] = useReducer(appReducer, initialState)
@@ -26,8 +25,16 @@ export default function App() {
     }
   }, [getTokenData])
 
+  async function loadLocalization() {
+    console.log("Local loaded from storage.")
+    const address = JSON.parse(await AsyncStorage.getItem('Localization'));
+    const action = { type: "createAddress", payload: address };
+    dispatch(action);
+  }
+
   useEffect(() => {
-    loadToken()
+    loadToken();
+    loadLocalization()
   }, [])
 
   return (
