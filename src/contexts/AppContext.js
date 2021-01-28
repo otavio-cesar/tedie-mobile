@@ -4,10 +4,12 @@ export const AppContext = createContext();
 
 export const appReducer = (state, action) => {
     switch (action.type) {
+        case 'createCarrinho':
+            return { ...state, carrinho: action.payload }
         case 'createAddress':
-            return { address: action.payload }
+            return { ...state, address: action.payload }
         case 'getToken':
-            return { token: action.payload }
+            return { ...state, token: action.payload }
         default:
             return state;
     }
@@ -15,5 +17,6 @@ export const appReducer = (state, action) => {
 
 export const initialState = {
     token: undefined,
-    address: undefined
+    address: undefined,
+    carrinho: new Array()
 }
