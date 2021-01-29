@@ -31,9 +31,17 @@ export default function App() {
     dispatch(action);
   }
 
+  async function loadCarrinho() {debugger
+    const carrinho = JSON.parse(await AsyncStorage.getItem('carrinho'));
+    if (!carrinho) return
+    const action = { type: "loadCarrinho", payload: carrinho };
+    dispatch(action);
+  }
+
   useEffect(() => {
     loadToken();
     loadLocalization()
+    loadCarrinho()
   }, [])
 
   return (

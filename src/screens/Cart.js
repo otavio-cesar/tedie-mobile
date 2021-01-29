@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import { StyleSheet, View, ScrollView } from 'react-native'
 // components
 import MainNavbar from '../components/MainNavbar'
@@ -10,14 +10,17 @@ import Box from '../components/Box'
 import Avatar from '../components/Avatar'
 // theme
 import theme from '../theme'
+import { AppContext } from '../contexts/AppContext'
 
 const Cart = ({ navigation }) => {
+  const { state, dispatch } = useContext(AppContext);
+
+  useEffect(() => {
+  })
+
   return (
     <React.Fragment>
       <MainNavbar />
-
-      
-
       <View style={styles.cartsContainer}>
         <Box direction="row" justify="flex-start" alignItems="center">
           <Typography size="medium" color={theme.palette.dark}>
@@ -25,52 +28,54 @@ const Cart = ({ navigation }) => {
           </Typography>
         </Box>
 
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.cartsList}
           horizontal
           showsHorizontalScrollIndicator={false}
         >
-          <Avatar 
+          <Avatar
             styles={styles.cartImage}
-            size={60} 
+            size={60}
             color={theme.palette.secondary}
             selected
           />
-          <Avatar 
+          <Avatar
             styles={styles.cartImage}
-            size={60} 
-            color={theme.palette.secondary} 
+            size={60}
+            color={theme.palette.secondary}
           />
-          <Avatar 
+          <Avatar
             styles={styles.cartImage}
-            size={60} 
-            color={theme.palette.secondary} 
+            size={60}
+            color={theme.palette.secondary}
           />
-          <Avatar 
+          <Avatar
             styles={styles.cartImage}
-            size={60} 
-            color={theme.palette.secondary} 
+            size={60}
+            color={theme.palette.secondary}
           />
-          <Avatar 
+          <Avatar
             styles={styles.cartImage}
-            size={60} 
-            color={theme.palette.secondary} 
+            size={60}
+            color={theme.palette.secondary}
           />
-          <Avatar 
+          <Avatar
             styles={styles.cartImage}
-            size={60} 
-            color={theme.palette.secondary} 
+            size={60}
+            color={theme.palette.secondary}
           />
         </ScrollView>
       </View>
-      
+
 
       <ScreenContainer>
         <View style={styles.container}>
           <Typography size="medium" color="#000">
             Big Bom
           </Typography>
-
+          {state.carrinho.map(carItem => (
+            <div>asd</div>
+          ))}
           <CartItem />
           <CartItem />
           <CartItem />
@@ -84,7 +89,7 @@ const Cart = ({ navigation }) => {
           Total R$ 12,60
         </Typography>
 
-        <Button 
+        <Button
           background={theme.palette.secondary}
           color={theme.palette.primary}
           width="50%"
@@ -116,7 +121,7 @@ const styles = StyleSheet.create({
     bottom: 0
   },
 
-  cartsContainer:{
+  cartsContainer: {
     paddingTop: 8
   },
   cartsList: {
