@@ -73,14 +73,10 @@ const Cart = ({ navigation }) => {
           <Typography size="medium" color="#000">
             Big Bom
           </Typography>
-          {state.carrinho.map(carItem => (
-            <div>asd</div>
+          {state.carrinho.map(cartItem => (
+            <div>{console.log(cartItem)}</div>
           ))}
-          <CartItem />
-          <CartItem />
-          <CartItem />
-          <CartItem />
-          <CartItem />
+          <CartItem cartItem />
         </View>
       </ScreenContainer>
 

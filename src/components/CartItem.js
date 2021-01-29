@@ -7,17 +7,29 @@ import Typography from './Typography'
 // theme
 import theme from '../theme'
 
-const CartItem = () => {
+const CartItem = (cartItem) => {
   return (
     <View style={styles.container}>
       <ContentContainer>
-        <View style={styles.image} />
+        {!cartItem.product.Imagem && (
+          <View style={styles.image} />
+        )}
+
+        {cartItem.product.Imagem && (
+          <Image
+            style={styles.image}
+            resizeMode="contain"
+            source={{
+              uri: product.Imagem,
+            }}
+          />
+        )}
       </ContentContainer>
 
       <View style={styles.infoContainer}>
         <View style={styles.infoLine}>
           <Typography size="small" color="#000">
-            Produto
+            {cartItem.product.Nome}
           </Typography>
           <Ionicons name="md-more" size={30} color={theme.palette.primary} />
         </View>
