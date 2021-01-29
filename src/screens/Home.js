@@ -55,6 +55,7 @@ const Home = ({ navigation }) => {
   }
 
   async function askLocalizationPermission() {
+    if (await AsyncStorage.getItem('Localization')) return
     (async () => {
       let { status } = await Location.requestPermissionsAsync();
       if (status !== 'granted') {
@@ -82,10 +83,6 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     loadAll();
   }, [state.address])
-
-  useEffect(() => {
-    loadAll();
-  }, []);
 
   return (
     <React.Fragment>

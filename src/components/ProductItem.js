@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
@@ -7,93 +7,84 @@ import Typography from './Typography'
 // theme
 import theme from '../theme'
 import { AppContext } from '../contexts/AppContext'
+import { useQuantity } from '../hooks/useQuantity'
 
 const ProductItem = ({ product, skeleton }) => {
-  // const { state, dispatch } = useContext(AppContext);
-  const [quantity, setQuantity] = useState(0)
+  const { state, dispatch } = useContext(AppContext);
+  const { quantity } = useQuantity(product)
 
   const handleRemove = (quantity) => {
     if (quantity - 1 < 0) return
-    setQuantity(quantity - 1)
+    const payload = { product: product, quantity: (quantity - 1) }
+    const action = { type: 'createCarrinho', payload: payload }
+    dispatch(action)
   }
 
   const handleAdd = (quantity) => {
-    setQuantity(quantity + 1)
-//     const carrinho = state.carrinho;
-//     console.log(product.IdProduto)
-//     const p = carrinho.filter(c => c.IdProduto == product.IdProduto)
-//     if (p.length)
-//       const payload = {
-//         ...carrinho.filter(c.IdProduto != product.IdProduto), product: { product: p, quantity: (quantity + 1) }
-//       }
-//     else
-//       const payload = { ...carrinho }, { product: p, quantity:(quantity + 1)
-//   }
-
-//   const action = { type: 'createCarrinho', payload: { ...state.carrinho, } }
-//   carrinho.createCarrinho()
-// }
+    const payload = { product: product, quantity: (quantity + 1) }
+    const action = { type: 'createCarrinho', payload: payload }
+    dispatch(action)
   }
 
-return (
-  <View style={styles.container}>
-    <ContentContainer>
-      {product.hasOffer && (
-        <View style={styles.offerContainer}>
-          <Typography size="small" color="#fff">
-            {product.off}
-          </Typography>
+  return (
+    <View style={styles.container}>
+      <ContentContainer>
+        {product.hasOffer && (
+          <View style={styles.offerContainer}>
+            <Typography size="small" color="#fff">
+              {product.off}
+            </Typography>
+          </View>
+        )}
+
+        {!product.imagem && (
+          <View style={styles.image} />
+        )}
+
+        {product.imagem && (
+          <Image
+            style={styles.image}
+            resizeMode="contain"
+            source={{
+              uri: product.imagem,
+            }}
+          />
+        )}
+
+        <View style={styles.quantityContainer}>
+          <TouchableOpacity
+            hitSlop={theme.hitSlop}
+            onPress={(e) => { e.preventDefault(); handleRemove(quantity) }}
+          >
+            <Ionicons name="md-remove" size={25} color={theme.palette.primary} />
+          </TouchableOpacity>
+
+          <Text style={styles.quantity}>{quantity}</Text>
+
+          <TouchableOpacity
+            hitSlop={theme.hitSlop}
+            onPress={(e) => { e.preventDefault(); handleAdd(quantity) }}
+          >
+            <Ionicons name="md-add" size={25} color={theme.palette.primary} />
+          </TouchableOpacity>
         </View>
-      )}
+      </ContentContainer>
 
-      {!product.imagem && (
-        <View style={styles.image} />
-      )}
-
-      {product.imagem && (
-        <Image
-          style={styles.image}
-          resizeMode="contain"
-          source={{
-            uri: product.imagem,
-          }}
-        />
-      )}
-
-      <View style={styles.quantityContainer}>
-        <TouchableOpacity
-          hitSlop={theme.hitSlop}
-          onPress={() => handleRemove(quantity)}
-        >
-          <Ionicons name="md-remove" size={25} color={theme.palette.primary} />
-        </TouchableOpacity>
-
-        <Text style={styles.quantity}>{quantity}</Text>
-
-        <TouchableOpacity
-          hitSlop={theme.hitSlop}
-          onPress={() => handleAdd(quantity)}
-        >
-          <Ionicons name="md-add" size={25} color={theme.palette.primary} />
-        </TouchableOpacity>
+      <View style={styles.textContainer}>
+        <Typography size="small" color="#000" wrap>
+          {product.Nome}
+        </Typography>
       </View>
-    </ContentContainer>
 
-    <View style={styles.textContainer}>
-      <Typography size="small" color="#000" wrap>
-        {product.Nome}
-      </Typography>
-    </View>
-
-    {/* <Typography size="small" color="#000">
+      {/* <Typography size="small" color="#000">
         big bom
       </Typography> */}
 
-    <Typography size="small" color="#000">
-      R$ {(product.Preco_Por ? product.Preco_Por : product.Preco_De ?? 0).toFixed(2).toString().replace('.', ',')}
-    </Typography>
-  </View>
-)
+      <Typography size="small" color="#000">
+        R$ {(product.Preco_Por ? product.Preco_Por : product.Preco_De ?? 0).toFixed(2).toString().replace('.', ',')}
+      </Typography>
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({

@@ -26,7 +26,6 @@ export default function App() {
   }, [getTokenData])
 
   async function loadLocalization() {
-    console.log("Local loaded from storage.")
     const address = JSON.parse(await AsyncStorage.getItem('Localization'));
     const action = { type: "createAddress", payload: address };
     dispatch(action);
