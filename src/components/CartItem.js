@@ -1,5 +1,5 @@
-import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import React, { useEffect } from 'react'
+import { StyleSheet, View,Image } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
 import ContentContainer from './ContentContainer'
@@ -7,20 +7,17 @@ import Typography from './Typography'
 // theme
 import theme from '../theme'
 
-const CartItem = (cartItem) => {
+const CartItem = ({cartItem}) => {
+
   return (
     <View style={styles.container}>
       <ContentContainer>
-        {!cartItem.product.Imagem && (
-          <View style={styles.image} />
-        )}
-
-        {cartItem.product.Imagem && (
+        {cartItem.product.imagem && (
           <Image
             style={styles.image}
             resizeMode="contain"
             source={{
-              uri: product.Imagem,
+              uri: cartItem.product.imagem,
             }}
           />
         )}
@@ -39,7 +36,7 @@ const CartItem = (cartItem) => {
             Qtd.
           </Typography>
           <Typography size="small" color="#000">
-            3
+            {cartItem.quantity}
           </Typography>
         </View>
 

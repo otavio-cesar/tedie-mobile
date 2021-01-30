@@ -25,7 +25,10 @@ export const initialState = {
 }
 
 function createCarrinho(state, action) {
-    const carrinho = [...state.carrinho.filter(c => c.product.Id != action.payload.product.Id), action.payload]
+    let carrinho = [...state.carrinho.filter(c => c.product.Id != action.payload.product.Id)]
+    if (action.payload.quantity > 0){
+        carrinho.push(action.payload)
+    }
     AsyncStorage.setItem("carrinho", JSON.stringify(carrinho))
     return { ...state, carrinho }
 }

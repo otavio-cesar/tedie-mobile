@@ -8,9 +8,11 @@ import {
   getTokenData
 } from './src/services'
 import { AppContext, appReducer, initialState } from './src/contexts/AppContext'
+import { CartContext, appCartReducer, cartInitialState } from './src/contexts/CartContext'
 
 export default function App() {
   const [state, dispatch] = useReducer(appReducer, initialState)
+  const [cartState, cartDispatch] = useReducer(appCartReducer, cartInitialState)
   const loadToken = useCallback(async () => {
     const response = await getTokenData()
 
@@ -31,7 +33,7 @@ export default function App() {
     dispatch(action);
   }
 
-  async function loadCarrinho() {debugger
+  async function loadCarrinho() {
     const carrinho = JSON.parse(await AsyncStorage.getItem('carrinho'));
     if (!carrinho) return
     const action = { type: "loadCarrinho", payload: carrinho };
@@ -46,9 +48,11 @@ export default function App() {
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
-      <NavigationContainer>
-        <Navigation />
-      </NavigationContainer>
+      <CartContext.Provider value={{ cartState, cartDispatch }}>
+        <NavigationContainer>
+          <Navigation />
+        </NavigationContainer>
+      </CartContext.Provider>
     </AppContext.Provider>
   );
 }

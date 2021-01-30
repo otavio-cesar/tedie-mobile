@@ -70,14 +70,14 @@ const Market = ({ navigation, route }) => {
           horizontal
           showsHorizontalScrollIndicator={false}
         >
-          {marketProducts.filter(p => p.hasOffer).map((p, index) => {
+          {marketProducts.filter(p => p.hasOffer).map((product, index) => {
             return (
               <TouchableOpacity
                 key={product.Id}
                 onPress={() => navigation.navigate("Produto", { product: product })}
               >
                 <ProductItem
-                  product={p}
+                  product={product}
                   key={index} />
               </TouchableOpacity>
             )
