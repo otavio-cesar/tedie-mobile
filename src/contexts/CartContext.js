@@ -5,8 +5,11 @@ export const CartContext = createContext();
 export const appCartReducer = (state, action) => {
     switch (action.type) {
         case 'select':
-            debugger
-            return { ...state, selected: action.payload }
+            return { ...state, selected: action.payload.IdEmpresa, selectedNome: action.payload.Nome }
+        case 'setTotalCompras':
+            return { ...state, totalCompras: action.payload.totalCompras }
+        case 'setSomaParcial':
+            return { ...state, totalCompras: action.payload.somaParcial }
         default:
             return state;
     }
@@ -14,4 +17,6 @@ export const appCartReducer = (state, action) => {
 
 export const cartInitialState = {
     selected: undefined,
+    selectedNome: undefined,
+    totalCompras: 0
 }

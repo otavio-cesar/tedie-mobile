@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { StyleSheet, View,Image } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react'
+import { StyleSheet, View, Image } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
 import ContentContainer from './ContentContainer'
@@ -7,8 +7,8 @@ import Typography from './Typography'
 // theme
 import theme from '../theme'
 
-const CartItem = ({cartItem}) => {
-
+const CartItem = ({ cartItem, valorCalculado }) => {
+ 
   return (
     <View style={styles.container}>
       <ContentContainer>
@@ -45,7 +45,8 @@ const CartItem = ({cartItem}) => {
             Total
           </Typography>
           <Typography size="small" color="#000">
-            R$ 12,60
+            {/* {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorCalculado)} */}
+            R$ {Number.parseFloat(valorCalculado).toFixed(2).replace('.', ',')} 
           </Typography>
         </View>
       </View>
@@ -63,7 +64,8 @@ const styles = StyleSheet.create({
 
   image: {
     width: 100,
-    height: 100
+    height: 100,
+    alignSelf: 'center'
   },
 
   infoContainer: {

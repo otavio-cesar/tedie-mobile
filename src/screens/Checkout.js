@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { 
-  StyleSheet, 
-  View, 
-  TouchableOpacity, 
+import React, { useContext, useEffect, useState } from 'react'
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
   TouchableWithoutFeedback
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
@@ -17,32 +17,16 @@ import Divider from '../components/Divider'
 import Button from '../components/Button'
 import RadioButton from '../components/RadioButton'
 import Box from '../components/Box'
+import { AppContext } from '../contexts/AppContext'
 
-const Checkout = ({ navigation }) => {
+const Checkout = ({ navigation, route }) => {
   const [selectedPayment, setSelectedPayment] = useState("credit")
+  const { state, dispatch } = useContext(AppContext);
 
-  const products = [
-    {
-      name: "Produto 01",
-      un: "1"
-    },
-    {
-      name: "produto 02 em gramas",
-      un: "2",
-      measurementUnit: "g",
-      measure: "200"
-    },
-    {
-      name: "produto 03 em kg",
-      un: "2",
-      measurementUnit: "g",
-      measure: "1,5"
-    },
-    {
-      name: "produto 04 com nome muito grande",
-      un: "2"
-    },
-  ]
+  const markets = route.params.markets
+
+  useEffect(() => {
+  })
 
   return (
     <React.Fragment>
@@ -63,7 +47,7 @@ const Checkout = ({ navigation }) => {
         {/* Delivery mode */}
         <ContentContainer>
           <TouchableOpacity onPress={() => navigation.navigate("Entrega")}>
-            <Box direction="row" justify="space-between" alignItems="center"> 
+            <Box direction="row" justify="space-between" alignItems="center">
               <Box direction="column" justify="center" alignItems="flex-start">
                 <Typography size="small" color={theme.palette.light}>
                   Entrega
@@ -91,13 +75,13 @@ const Checkout = ({ navigation }) => {
 
               <View style={styles.locationContainer}>
                 <Ionicons name="md-locate" size={25} color={theme.palette.primary} />
-                
+
                 <View style={styles.locationInfo}>
                   <Typography size="small" color={theme.palette.dark}>
                     Avenida Dona Gertrudes, 100
                   </Typography>
                 </View>
-                
+
                 <Ionicons name="ios-arrow-forward" size={25} color={theme.palette.primary} />
               </View>
             </View>
@@ -106,44 +90,51 @@ const Checkout = ({ navigation }) => {
         {/* End Delivery Location */}
 
         {/* Prices and Totals */}
-        <ContentContainer>
-          <View style={styles.pricesOuterContiner}>
-            <Typography size="large" color={theme.palette.dark}>
-              Big Bom
-            </Typography>
 
-            <Divider />
+        {markets.length > 0 && markets.map((market, index) => (
+          <TouchableOpacity onPress={() => cartDispatch({ type: "select", payload: market.IdEmpresa })}>
+            <ContentContainer>
+              <View style={styles.pricesOuterContiner}>
+                <Typography size="large" color={theme.palette.dark}>
+                  {market.Nome}
+                </Typography>
 
-            <View style={styles.priceContainer}>
-              <Typography size="small" color={theme.palette.light}>
-                Total em produtos
-              </Typography>
-              <Typography size="small" color={theme.palette.light}>
-                R$ 526,39
-              </Typography>
-            </View>
+                <Divider />
 
-            <View style={styles.priceContainer}>
-              <Typography size="small" color={theme.palette.light}>
-                Entrega
+                <View style={styles.priceContainer}>
+                  <Typography size="small" color={theme.palette.light}>
+                    Total em produtos
               </Typography>
-              <Typography size="small" color={theme.palette.light}>
-                R$ 10,00
+                  <Typography size="small" color={theme.palette.light}>
+                    R$ 526,39
               </Typography>
-            </View>
+                </View>
 
-            <Divider />
+                <View style={styles.priceContainer}>
+                  <Typography size="small" color={theme.palette.light}>
+                    Entrega
+              </Typography>
+                  <Typography size="small" color={theme.palette.light}>
+                    R$ 10,00
+              </Typography>
+                </View>
 
-            <View style={styles.priceContainer}>
-              <Typography size="medium" color={theme.palette.dark}>
-                TOTAL
+                <Divider />
+
+                <View style={styles.priceContainer}>
+                  <Typography size="medium" color={theme.palette.dark}>
+                    TOTAL
               </Typography>
-              <Typography size="medium" color={theme.palette.dark}>
-                R$ 536,39
+                  <Typography size="medium" color={theme.palette.dark}>
+                    R$ 536,39
               </Typography>
-            </View>
-          </View>
-        </ContentContainer>
+                </View>
+              </View>
+            </ContentContainer>
+          </TouchableOpacity>
+        ))}
+
+
         {/* End Prices and Totals */}
 
         {/* Coupons */}
@@ -151,7 +142,7 @@ const Checkout = ({ navigation }) => {
           <ContentContainer>
             <View style={styles.couponContainer}>
               <Ionicons name="md-pricetag" size={25} color={theme.palette.light} />
-            
+
               <View style={styles.couponTextContainer}>
                 <Typography size="small" color={theme.palette.light}>
                   Selecionar Cupom
@@ -159,7 +150,7 @@ const Checkout = ({ navigation }) => {
               </View>
 
               <Ionicons name="ios-arrow-forward" size={25} color={theme.palette.primary} />
-            </View>    
+            </View>
           </ContentContainer>
         </TouchableOpacity>
         {/* End Coupons */}
@@ -183,8 +174,8 @@ const Checkout = ({ navigation }) => {
                     VISA **** 1234
                   </Typography>
                 </View>
-                
-                
+
+
                 <Typography size="small" color={theme.palette.primary}>
                   Trocar
                 </Typography>
@@ -221,17 +212,17 @@ const Checkout = ({ navigation }) => {
                     123.456.789-00
                   </Typography>
                 </View>
-                
+
                 <Typography size="small" color={theme.palette.primary}>
                   Trocar
                 </Typography>
               </View>
             </TouchableOpacity>
-          </View>    
+          </View>
         </ContentContainer>
         {/* End Payment Methods */}
-      
-        <Button 
+
+        <Button
           background={theme.palette.primary}
           color="#fff"
           width="100%"
@@ -292,7 +283,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 8 
+    marginVertical: 8
   }
 })
 

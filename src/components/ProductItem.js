@@ -8,22 +8,41 @@ import Typography from './Typography'
 import theme from '../theme'
 import { AppContext } from '../contexts/AppContext'
 import { useQuantity } from '../hooks/useQuantity'
+import { CartContext } from '../contexts/CartContext'
 
 const ProductItem = ({ product, skeleton }) => {
   const { state, dispatch } = useContext(AppContext);
+  const { cartState, cartDispatch } = useContext(CartContext);
   const { quantity } = useQuantity(product)
 
   const handleRemove = (quantity) => {
     if (quantity - 1 < 0) return
     const payload = { product: product, quantity: (quantity - 1) }
-    const action = { type: 'createCarrinho', payload: payload }
+    let action = { type: 'createCarrinho', payload: payload }
     dispatch(action)
+
+    action = { type: "setTotalCompras", payload: { totalCompras: 0 } }
+    cartDispatch(action)
+
+    action = { type: "setSomaParcial", payload: { somaParcial: [] } }
+    cartDispatch(action)
+
+    if (quantity - 1 == 0) {
+      action = { type: "select", payload: { selected: undefined, selectedNome: undefined } }
+      cartDispatch(action)
+    }
   }
 
   const handleAdd = (quantity) => {
     const payload = { product: product, quantity: (quantity + 1) }
-    const action = { type: 'createCarrinho', payload: payload }
+    let action = { type: 'createCarrinho', payload: payload }
     dispatch(action)
+
+    action = { type: "setTotalCompras", payload: { totalCompras: 0 } }
+    cartDispatch(action)
+
+    action = { type: "setSomaParcial", payload: { somaParcial: [] } }
+    cartDispatch(action)
   }
 
   return (
