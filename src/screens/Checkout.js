@@ -18,15 +18,19 @@ import Button from '../components/Button'
 import RadioButton from '../components/RadioButton'
 import Box from '../components/Box'
 import { AppContext } from '../contexts/AppContext'
+import { CartContext } from '../contexts/CartContext'
 
 const Checkout = ({ navigation, route }) => {
   const [selectedPayment, setSelectedPayment] = useState("credit")
   const { state, dispatch } = useContext(AppContext);
+  const { cartState, cartDispatch } = useContext(CartContext);
+  const [markets, setMarkets] = useState(route.params.markets)
 
-  const markets = route.params.markets
+  // const markets = route.params.markets
 
   useEffect(() => {
-  })
+    console.log(cartState.totalComprasPorEstabelecimento)
+  }, [cartState.totalComprasPorEstabelecimento])
 
   return (
     <React.Fragment>
@@ -106,8 +110,8 @@ const Checkout = ({ navigation, route }) => {
                     Total em produtos
               </Typography>
                   <Typography size="small" color={theme.palette.light}>
-                    R$ 526,39
-              </Typography>
+                    R$ {cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`]}
+                  </Typography>
                 </View>
 
                 <View style={styles.priceContainer}>

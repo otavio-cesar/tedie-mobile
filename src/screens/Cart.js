@@ -22,12 +22,30 @@ const Cart = ({ navigation }) => {
   const [markets, setMarkets] = useState([])
   const [produtosAtacado, setProdutosAtacado] = useState([])
 
-  async function carregaCarrinho() {
-    const selectedMarkets = state.carrinho
+  function getSelectedMarkets() {
+    return state.carrinho
       .filter((c, i, v) => v.findIndex((f) => f.product.IdEmpresa == c.product.IdEmpresa) == i)
       .map(c => c.product.IdEmpresa)
+  }
+
+  async function carregaCarrinho() {
+    const selectedMarkets = getSelectedMarkets()
     getMarketsListByIds(selectedMarkets)
       .then(markets => setMarkets(markets))
+  }
+
+  async function calculaTotalCompraPorEstabelecimento() {
+    const selectedMarkets = getSelectedMarkets()
+    let est = []
+    let valParc
+    selectedMarkets.forEach(s => {
+      valParc = state.carrinho.filter(c => c.product.IdEmpresa == s).reduce((acc, v) => {
+        return acc + calculaValorItem(v.product.Id, v.quantity)
+      }, 0)
+      est[`"${s}"`] = valParc
+    })
+    const action = { type: "setTotalComprasPorEstabelecimento", payload: { totalComprasPorEstabelecimento: est } }
+    cartDispatch(action);
   }
 
   async function calculaTotalCompras() {
@@ -52,6 +70,7 @@ const Cart = ({ navigation }) => {
     }
     carregaCarrinho()
     calculaTotalCompras()
+    calculaTotalCompraPorEstabelecimento()
   }, [state.carrinho, produtosAtacado])
 
   async function handleSelectMarket(market) {
@@ -135,7 +154,7 @@ const Cart = ({ navigation }) => {
         <Typography size="small" color="#000">
           {/* Total soma  {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
             .format(cartState.totalCompras)} */}
-             Total soma R$ {Number.parseFloat(cartState.totalCompras).toFixed(2).replace('.', ',')} 
+             Total soma R$ {Number.parseFloat(cartState.totalCompras).toFixed(2).replace('.', ',')}
         </Typography>
 
         <Button
