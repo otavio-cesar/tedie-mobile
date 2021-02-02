@@ -10,6 +10,9 @@ export const appCartReducer = (state, action) => {
             return { ...state, totalCompras: action.payload.totalCompras }
         case 'setSomaParcial':
             return { ...state, totalCompras: action.payload.somaParcial }
+        case 'setMarkets':
+            debugger
+            return { ...state, markets: action.payload.markets }
         default:
             return state;
     }
@@ -18,5 +21,6 @@ export const appCartReducer = (state, action) => {
 export const cartInitialState = {
     selected: undefined,
     selectedNome: undefined,
-    totalCompras: 0
+    totalCompras: 0,
+    markets: []
 }

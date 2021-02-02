@@ -17,16 +17,11 @@ import Divider from '../components/Divider'
 import Button from '../components/Button'
 import RadioButton from '../components/RadioButton'
 import Box from '../components/Box'
-import { AppContext } from '../contexts/AppContext'
+import { CartContext } from '../contexts/CartContext'
 
 const Checkout = ({ navigation, route }) => {
   const [selectedPayment, setSelectedPayment] = useState("credit")
-  const { state, dispatch } = useContext(AppContext);
-
-  const markets = route.params.markets
-
-  useEffect(() => {
-  })
+  const { cartState, cartDispatch } = useContext(CartContext);
 
   return (
     <React.Fragment>
@@ -91,7 +86,7 @@ const Checkout = ({ navigation, route }) => {
 
         {/* Prices and Totals */}
 
-        {markets.length > 0 && markets.map((market, index) => (
+        {cartState.markets.length > 0 && cartState.markets.map((market, index) => (
           <TouchableOpacity onPress={() => cartDispatch({ type: "select", payload: market.IdEmpresa })}>
             <ContentContainer>
               <View style={styles.pricesOuterContiner}>

@@ -19,7 +19,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler'
 const Cart = ({ navigation }) => {
   const { cartState, cartDispatch } = useContext(CartContext);
   const { state, dispatch } = useContext(AppContext);
-  const [markets, setMarkets] = useState([])
+
   const [produtosAtacado, setProdutosAtacado] = useState([])
 
   async function carregaCarrinho() {
@@ -27,7 +27,10 @@ const Cart = ({ navigation }) => {
       .filter((c, i, v) => v.findIndex((f) => f.product.IdEmpresa == c.product.IdEmpresa) == i)
       .map(c => c.product.IdEmpresa)
     getMarketsListByIds(selectedMarkets)
-      .then(markets => setMarkets(markets))
+      .then(markets => {
+        const action = { type: "setMarkets", payload: { markets: markets } }
+        cartDispatch(action);
+      })
   }
 
   async function calculaTotalCompras() {
@@ -99,14 +102,14 @@ const Cart = ({ navigation }) => {
           horizontal
           showsHorizontalScrollIndicator={false}
         >
-          {markets.length > 0 && markets.map((market, index) => (
+          {cartState.markets.length > 0 && cartState.markets.map((market, index) => (
             <TouchableOpacity onPress={() => handleSelectMarket(market)}>
               <Avatar
                 key={index}
                 styles={styles.cartImage}
                 size={60}
                 color={theme.palette.secondary}
-                selected={(cartState.selected ? cartState.selected : markets[0].IdEmpresa) == market.IdEmpresa ? true : false}
+                selected={(cartState.selected ? cartState.selected : cartState.markets[0].IdEmpresa) == market.IdEmpresa ? true : false}
               />
             </TouchableOpacity>
           ))}
@@ -116,10 +119,10 @@ const Cart = ({ navigation }) => {
       <ScreenContainer>
         <View style={styles.container}>
           <Typography size="medium" color="#000">
-            {markets.length > 0 && (cartState.selectedNome ? cartState.selectedNome : markets[0].Nome)}
+            {cartState.markets.length > 0 && (cartState.selectedNome ? cartState.selectedNome : cartState.markets[0].Nome)}
           </Typography>
-          {markets.length > 0 && state.carrinho
-            .filter(market => market.product.IdEmpresa == (cartState.selected ? cartState.selected : markets[0].IdEmpresa))
+          {cartState.markets.length > 0 && state.carrinho
+            .filter(market => market.product.IdEmpresa == (cartState.selected ? cartState.selected : cartState.markets[0].IdEmpresa))
             .map((cartItem, index) => (
               <>
                 <CartItem
@@ -135,7 +138,7 @@ const Cart = ({ navigation }) => {
         <Typography size="small" color="#000">
           {/* Total soma  {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
             .format(cartState.totalCompras)} */}
-             Total soma R$ {Number.parseFloat(cartState.totalCompras).toFixed(2).replace('.', ',')} 
+             Total soma R$ {Number.parseFloat(cartState.totalCompras).toFixed(2).replace('.', ',')}
         </Typography>
 
         <Button
@@ -143,7 +146,7 @@ const Cart = ({ navigation }) => {
           color={theme.palette.primary}
           width="50%"
           text="Checkout"
-          onPress={() => navigation.navigate('Checkout', { markets: markets })}
+          onPress={() => navigation.navigate('Checkout')}
         />
       </View>
     </React.Fragment>
