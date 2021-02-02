@@ -13,6 +13,9 @@ export const appCartReducer = (state, action) => {
         case 'setMarkets':
             debugger
             return { ...state, markets: action.payload.markets }
+        case 'setTotalComprasPorEstabelecimento':
+            return { ...state, totalComprasPorEstabelecimento: action.payload.totalComprasPorEstabelecimento }
+
         default:
             return state;
     }
@@ -22,5 +25,6 @@ export const cartInitialState = {
     selected: undefined,
     selectedNome: undefined,
     totalCompras: 0,
-    markets: []
+    markets: [],
+    totalComprasPorEstabelecimento: []
 }

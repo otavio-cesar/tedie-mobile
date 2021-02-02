@@ -27,6 +27,9 @@ const ProductItem = ({ product, skeleton }) => {
     action = { type: "setSomaParcial", payload: { somaParcial: [] } }
     cartDispatch(action)
 
+    action = { type: "setTotalComprasPorEstabelecimento", payload: { totalComprasPorEstabelecimento: [] } }
+    cartDispatch(action)
+
     if (quantity - 1 == 0) {
       action = { type: "select", payload: { selected: undefined, selectedNome: undefined } }
       cartDispatch(action)
@@ -42,6 +45,9 @@ const ProductItem = ({ product, skeleton }) => {
     cartDispatch(action)
 
     action = { type: "setSomaParcial", payload: { somaParcial: [] } }
+    cartDispatch(action)
+
+    action = { type: "setTotalComprasPorEstabelecimento", payload: { totalComprasPorEstabelecimento: [] } }
     cartDispatch(action)
   }
 
