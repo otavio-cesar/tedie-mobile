@@ -11,7 +11,6 @@ export const appCartReducer = (state, action) => {
         case 'setSomaParcial':
             return { ...state, totalCompras: action.payload.somaParcial }
         case 'setMarkets':
-            debugger
             return { ...state, markets: action.payload.markets }
         case 'setTotalComprasPorEstabelecimento':
             return { ...state, totalComprasPorEstabelecimento: action.payload.totalComprasPorEstabelecimento }

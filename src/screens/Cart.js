@@ -124,7 +124,7 @@ const Cart = ({ navigation }) => {
           {cartState.markets.length > 0 && cartState.markets.map((market, index) => (
             <TouchableOpacity onPress={() => handleSelectMarket(market)}>
               <Avatar
-                key={index}
+                key={index + "-" + market.IdEmpresa}
                 styles={styles.cartImage}
                 size={60}
                 color={theme.palette.secondary}

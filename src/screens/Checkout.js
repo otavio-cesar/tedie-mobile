@@ -18,18 +18,12 @@ import Button from '../components/Button'
 import RadioButton from '../components/RadioButton'
 import Box from '../components/Box'
 import { CartContext } from '../contexts/CartContext'
+import { CheckoutContext } from '../contexts/CheckoutContext'
 
 const Checkout = ({ navigation, route }) => {
   const [selectedPayment, setSelectedPayment] = useState("credit")
-  const { state, dispatch } = useContext(AppContext);
   const { cartState, cartDispatch } = useContext(CartContext);
-  const [markets, setMarkets] = useState(route.params.markets)
-
-  // const markets = route.params.markets
-
-  useEffect(() => {
-    console.log(cartState.totalComprasPorEstabelecimento)
-  }, [cartState.totalComprasPorEstabelecimento])
+  const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
 
   return (
     <React.Fragment>
@@ -96,7 +90,7 @@ const Checkout = ({ navigation, route }) => {
 
         {cartState.markets.length > 0 && cartState.markets.map((market, index) => (
           <TouchableOpacity onPress={() => cartDispatch({ type: "select", payload: market.IdEmpresa })}>
-            <ContentContainer>
+            <ContentContainer background={index == checkoutState.selectedMarketIndex ? 'black' : {}}>
               <View style={styles.pricesOuterContiner}>
                 <Typography size="large" color={theme.palette.dark}>
                   {market.Nome}
@@ -109,7 +103,7 @@ const Checkout = ({ navigation, route }) => {
                     Total em produtos
               </Typography>
                   <Typography size="small" color={theme.palette.light}>
-                    R$ {cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`]}
+                    R$ {cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`].toFixed(2).replace('.', ',')}
                   </Typography>
                 </View>
 
@@ -259,7 +253,8 @@ const styles = StyleSheet.create({
   pricesOuterContiner: {
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'flex-start'
+    alignItems: 'flex-start',
+    textShadow: '0 0 black'
   },
   priceContainer: {
     width: '100%',
