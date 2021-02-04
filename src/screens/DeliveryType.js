@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
@@ -11,9 +11,26 @@ import Divider from '../components/Divider'
 import RadioButton from '../components/RadioButton'
 // theme
 import theme from '../theme'
+import { CheckoutContext } from '../contexts/CheckoutContext'
+import { CartContext } from '../contexts/CartContext'
+import { buscaHorarios } from '../services/market'
 
 const DeliveryType = ({ navigation }) => {
   const [selectedType, setSelectedType] = useState(0)
+  const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
+  const { cartState, cartDispatch } = useContext(CartContext);
+  const [horarios, setHorarios] = useState([])
+
+  useEffect(() => {
+    const market = cartState.markets[checkoutState.selectedMarketIndex]
+    buscaHorariosEstabelecimento(market.IdEmpresa)
+  }, [checkoutState.selectedMarketIndex])
+
+  async function buscaHorariosEstabelecimento(idEmpresa) {
+    const horarios = await buscaHorarios(idEmpresa)
+    console.log(horarios)
+    setHorarios(horarios)
+  }
 
   return (
     <React.Fragment>
@@ -31,67 +48,30 @@ const DeliveryType = ({ navigation }) => {
       />
 
       <ScreenContainer>
-        <ContentContainer>
-          <Box direction="column" justify="center" alignContent="flex-start">
-            <Typography size="large" color={theme.palette.dark}>
-              Entrega
-            </Typography>
+        {horarios.map((h, index) => (
+          <ContentContainer>
+            <Box direction="column" justify="center" alignContent="flex-start">
+              <Typography size="large" color={theme.palette.dark}>
+               {h.TIPOENTREGA}
+              </Typography>
 
-            <Divider />
+              <Divider />
+              {horarios.filter(t => t.identrega == h.identrega)
+                .map((th, index) => (
+                  <TouchableOpacity onPress={() => setSelectedType(0)}>
+                    <Box direction="row" justify="space-between" alignItems="center" fullwidth>
+                      <Typography size="small" color={theme.palette.light}>
+                        {th.horario}
+                      </Typography>
+                      <RadioButton selected={selectedType === 0} />
+                    </Box>
+                  </TouchableOpacity>
+                ))}
+            </Box>
+          </ContentContainer>
+        ))}
 
-            <TouchableOpacity onPress={() => setSelectedType(0)}>
-              <Box direction="row" justify="space-between" alignItems="center" fullwidth> 
-                <Typography size="small" color={theme.palette.light}>
-                  Das 13:00 às 15:00
-                </Typography>
-                <RadioButton selected={selectedType === 0} />
-              </Box>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setSelectedType(1)}>
-              <Box direction="row" justify="space-between" alignItems="center" fullwidth> 
-                <Typography size="small" color={theme.palette.light}>
-                  Das 16:00 às 18:00
-                </Typography>
-                <RadioButton selected={selectedType === 1} />
-              </Box>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setSelectedType(2)}>
-              <Box direction="row" justify="space-between" alignItems="center" fullwidth> 
-                <Typography size="small" color={theme.palette.light}>
-                  Das 19:00 às 20:30
-                </Typography>
-                <RadioButton selected={selectedType === 2} />
-              </Box>
-            </TouchableOpacity>
-          </Box>
-        </ContentContainer>
-        
-        <ContentContainer>
-          <Box direction="column" justify="center" alignItems="flex-start">
-            <Typography size="large" color={theme.palette.dark}>
-              Retirada
-            </Typography>
 
-            <Divider />
-
-            <TouchableOpacity onPress={() => setSelectedType(3)}>
-              <Box direction="row" justify="space-between" alignItems="center" fullwidth> 
-                <Typography size="small" color={theme.palette.light}>
-                  Das 13:00 às 15:00
-                </Typography>
-                <RadioButton selected={selectedType === 3} />
-              </Box>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setSelectedType(4)}>
-              <Box direction="row" justify="space-between" alignItems="center" fullwidth> 
-                <Typography size="small" color={theme.palette.light}>
-                  Das 19:00 às 20:30
-                </Typography>
-                <RadioButton selected={selectedType === 4} />
-              </Box>
-            </TouchableOpacity>
-          </Box>
-        </ContentContainer>
       </ScreenContainer>
     </React.Fragment>
   )

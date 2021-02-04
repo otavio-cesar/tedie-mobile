@@ -1,5 +1,13 @@
 import Axios from 'axios'
 
+export const buscaHorarios = async (id) => {
+  const response = await Axios.get(
+    `http://localhost:59618/api/empresas/horarios?id=${id}`,
+  )
+
+  return response.data
+}
+
 export const getMarketsListByIds = async (ids) => {
   const response = await Axios.get(
     `http://tedie.azurewebsites.net/api/empresas/getMarketsListByIds?ids=${ids.join('&ids=')}`,

@@ -25,6 +25,11 @@ const Checkout = ({ navigation, route }) => {
   const { cartState, cartDispatch } = useContext(CartContext);
   const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
 
+  useEffect(() => {
+    console.log(cartState.markets)
+    console.log(checkoutState.selectedMarketIndex)
+  }, [checkoutState.selectedMarketIndex])
+
   return (
     <React.Fragment>
       <Navbar
@@ -89,8 +94,8 @@ const Checkout = ({ navigation, route }) => {
         {/* Prices and Totals */}
 
         {cartState.markets.length > 0 && cartState.markets.map((market, index) => (
-          <TouchableOpacity onPress={() => cartDispatch({ type: "select", payload: market.IdEmpresa })}>
-            <ContentContainer background={index == checkoutState.selectedMarketIndex ? 'black' : {}}>
+          <TouchableOpacity onPress={() => checkoutDispatch({ type: "setSelectedMarketIndex", payload: { selectedMarketIndex: index } })}>
+            <ContentContainer>
               <View style={styles.pricesOuterContiner}>
                 <Typography size="large" color={theme.palette.dark}>
                   {market.Nome}
