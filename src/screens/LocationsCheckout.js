@@ -15,14 +15,16 @@ import Toast, { DURATION } from 'react-native-easy-toast'
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-community/async-storage'
 import { AppContext } from '../contexts/AppContext'
+import { CheckoutContext } from '../contexts/CheckoutContext'
+import { CartContext } from '../contexts/CartContext'
 
-const Locations = ({ route, navigation }) => {
+const LocationsCheckout = ({ route, navigation }) => {
   const { state, dispatch } = useContext(AppContext);
+  const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
+  const { cartState, cartDispatch } = useContext(CartContext);
   const [locationsLoader, setLocationsLoader] = useState(false)
   const [locations, setLocations] = useState([])
   const toastRef = useRef();
-
-  // const { setLocalHome } = route.params;
 
   const loadLocations = useCallback(async () => {
     setLocationsLoader(true)
@@ -38,31 +40,13 @@ const Locations = ({ route, navigation }) => {
   }, [loadLocations])
 
   async function setLocalization(local) {
-    if (local == 'gps') {
-      (async () => {
-        let { status } = await Location.requestPermissionsAsync();
-        if (status !== 'granted') {
-          setErrorMsg('Permission to access location was denied');
-          return;
-        }
+    const market = cartState.markets[checkoutState.selectedMarketIndex]
+    let ee = { ...checkoutState.enderecoEntregaPorEstabelecimento }
+    ee[`${market.IdEmpresa}`] = local
+    const action = { type: "setEnderecoEntregaPorEstabelecimento", payload: { enderecoEntregaPorEstabelecimento: ee } }
+    checkoutDispatch(action);
 
-        let location = await Location.getCurrentPositionAsync({});
-        const address = await getLocationByLatLong(location.coords.latitude, location.coords.longitude);
-        await AsyncStorage.setItem("Localization", JSON.stringify(address));
-
-        const action = { type: "createAddress", payload: address };
-        dispatch(action);
-
-        toastRef.current?.show('Endereço selecionado', 2000)
-      })()
-    } else {
-      await AsyncStorage.setItem('Localization', JSON.stringify(local));
-
-      const action = { type: "createAddress", payload: local };
-      dispatch(action);
-
-      toastRef.current?.show('Endereço selecionado', 2000)
-    }
+    navigation.pop()
   }
 
   return (
@@ -76,7 +60,7 @@ const Locations = ({ route, navigation }) => {
       <StatusBar backgroundColor={theme.palette.primary} />
       <Navbar
         left={
-          <TouchableOpacity hitSlop={theme.hitSlop} onPress={() => navigation.pop()}>
+          <TouchableOpacity hitSlop={theme.hitSlop} onPress={() => navigation.back}>
             <Ionicons name="md-arrow-back" size={25} color="#fff" />
           </TouchableOpacity>
         }
@@ -96,30 +80,6 @@ const Locations = ({ route, navigation }) => {
               style={styles.textInput}
               value="Digite o endereço"
             />
-          </View>
-        </ContentContainer>
-
-        <ContentContainer background="#fff" >
-          <View style={{ flexDirection: 'row', flex: 1 }}>
-            <TouchableOpacity onPress={() => setLocalization('gps')}
-              style={{
-                flex: 1,
-                width: '100%',
-                minWidth: '50%',
-                paddingLeft: '25%',
-                flexDirection: 'row'
-              }}
-            >
-              <View style={{ position: 'absolute', left: 0 }}>
-                <Ionicons name="md-locate" size={30} color={theme.palette.primary} />
-              </View>
-              <Text style={{ paddingLeft: 8 }}>
-                Usar Localização Atual
-              </Text>
-            </TouchableOpacity>
-            <View style={{ position: 'absolute', right: 0 }}>
-              <Ionicons name="ios-arrow-forward" size={30} color={theme.palette.primary} />
-            </View>
           </View>
         </ContentContainer>
 
@@ -176,4 +136,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default Locations
+export default LocationsCheckout

@@ -10,8 +10,8 @@ export const appCheckoutReducer = (state, action) => {
             return { ...state, opcaoPagamento: action.payload.opcaoPagamento }
         case 'setCupom':
             return { ...state, cupom: action.payload.cupom }
-        case 'setIsRetiradaPorEstabelecimento':
-            return { ...state, isRetiradaPorEstabelecimento: action.payload.isRetiradaPorEstabelecimento }
+        case 'setHorarioEntregaPorEstabelecimento':
+            return { ...state, horarioEntregaPorEstabelecimento: action.payload.horarioEntregaPorEstabelecimento }
         case 'setEnderecoEntregaPorEstabelecimento':
             return { ...state, enderecoEntregaPorEstabelecimento: action.payload.enderecoEntregaPorEstabelecimento }
 
@@ -24,6 +24,6 @@ export const checkoutInitialState = {
     selectedMarketIndex: 0,
     opcaoPagamento: undefined,
     cupom: undefined,
-    isRetiradaPorEstabelecimento: [],
+    horarioEntregaPorEstabelecimento: [],
     enderecoEntregaPorEstabelecimento: []
 }

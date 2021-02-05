@@ -26,10 +26,32 @@ const DeliveryType = ({ navigation }) => {
     buscaHorariosEstabelecimento(market.IdEmpresa)
   }, [checkoutState.selectedMarketIndex])
 
+  useEffect(() => {
+    if (horarios.length > 0) {
+      setSelectedIndexSaved()
+    }
+  }, [horarios, checkoutState.selectedMarketIndex])
+
+  async function setSelectedIndexSaved() {
+    const market = cartState.markets[checkoutState.selectedMarketIndex]
+    const horarioEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]
+    setSelectedType(horarioEntrega)
+  }
+
   async function buscaHorariosEstabelecimento(idEmpresa) {
     const horarios = await buscaHorarios(idEmpresa)
-    console.log(horarios)
     setHorarios(horarios)
+  }
+
+  async function setSelectedHorario(horario) {
+    const horarioEntrega = `${horario.TIPOENTREGA}-${horario.horario}`
+    setSelectedType(horarioEntrega)
+
+    const market = cartState.markets[checkoutState.selectedMarketIndex]
+    let he = { ...checkoutState.horarioEntregaPorEstabelecimento }
+    he[`${market.IdEmpresa}`] = horarioEntrega
+    const action = { type: "setHorarioEntregaPorEstabelecimento", payload: { horarioEntregaPorEstabelecimento: he } }
+    checkoutDispatch(action);
   }
 
   return (
@@ -49,28 +71,27 @@ const DeliveryType = ({ navigation }) => {
 
       <ScreenContainer>
         {horarios.map((h, index) => (
-          <ContentContainer>
+          <ContentContainer key={`${h.identrega}-${h.horacod}`}>
             <Box direction="column" justify="center" alignContent="flex-start">
               <Typography size="large" color={theme.palette.dark}>
-               {h.TIPOENTREGA}
+                {h.TIPOENTREGA}
               </Typography>
 
               <Divider />
               {horarios.filter(t => t.identrega == h.identrega)
                 .map((th, index) => (
-                  <TouchableOpacity onPress={() => setSelectedType(0)}>
+                  <TouchableOpacity key={`${th.identrega}-${th.horacod}`} onPress={() => setSelectedHorario(th)}>
                     <Box direction="row" justify="space-between" alignItems="center" fullwidth>
                       <Typography size="small" color={theme.palette.light}>
                         {th.horario}
                       </Typography>
-                      <RadioButton selected={selectedType === 0} />
+                      <RadioButton selected={selectedType === `${th.TIPOENTREGA}-${th.horario}`} />
                     </Box>
                   </TouchableOpacity>
                 ))}
             </Box>
           </ContentContainer>
         ))}
-
 
       </ScreenContainer>
     </React.Fragment>

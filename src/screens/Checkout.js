@@ -24,11 +24,39 @@ const Checkout = ({ navigation, route }) => {
   const [selectedPayment, setSelectedPayment] = useState("credit")
   const { cartState, cartDispatch } = useContext(CartContext);
   const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
+  const [showHorario, setShowHorario] = useState("Tipo de entrega-Horário")
+  const [showEndereco, setShowEndereco] = useState("Selecione")
 
   useEffect(() => {
     console.log(cartState.markets)
     console.log(checkoutState.selectedMarketIndex)
+    changeAddress()
+    changeHorario()
   }, [checkoutState.selectedMarketIndex])
+
+  useEffect(() => {
+    console.log(checkoutState.horarioEntregaPorEstabelecimento)
+    changeHorario()
+  }, [checkoutState.horarioEntregaPorEstabelecimento])
+
+  useEffect(() => {
+    console.log(checkoutState.enderecoEntregaPorEstabelecimento)
+    changeAddress()
+  }, [checkoutState.enderecoEntregaPorEstabelecimento])
+
+  async function changeAddress() {
+    if (checkoutState.enderecoEntregaPorEstabelecimento.length == 0) return
+    const market = cartState.markets[checkoutState.selectedMarketIndex]
+    const selected = checkoutState.enderecoEntregaPorEstabelecimento[market.IdEmpresa]
+    setShowEndereco(selected?.Beautify ?? "Selecione")
+  }
+
+  async function changeHorario() {
+    if (checkoutState.horarioEntregaPorEstabelecimento.length == 0) return
+    const market = cartState.markets[checkoutState.selectedMarketIndex]
+    const selected = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]
+    setShowHorario(selected?.split('-').length > 0 ? selected: "Tipo de entrega-Horário")
+  }
 
   return (
     <React.Fragment>
@@ -52,10 +80,10 @@ const Checkout = ({ navigation, route }) => {
             <Box direction="row" justify="space-between" alignItems="center">
               <Box direction="column" justify="center" alignItems="flex-start">
                 <Typography size="small" color={theme.palette.light}>
-                  Entrega
+                  {showHorario?.split('-').length > 0 ? showHorario.split('-')[0] : "Tipo de entrega"}
                 </Typography>
                 <Typography size="small" color={theme.palette.dark}>
-                  A partir de 16:30
+                  {showHorario?.split('-').length > 0 ? showHorario.split('-')[1] : "Horário"}
                 </Typography>
               </Box>
 
@@ -69,7 +97,7 @@ const Checkout = ({ navigation, route }) => {
 
         {/* Delivery Location */}
         <ContentContainer>
-          <TouchableWithoutFeedback onPress={() => navigation.navigate('Localizações')}>
+          <TouchableWithoutFeedback onPress={() => navigation.navigate('LocalizaçõesCheckout')}>
             <View style={styles.locationOuterContainer}>
               <Typography size="caption" color={theme.palette.light}>
                 Entregar em
@@ -80,7 +108,7 @@ const Checkout = ({ navigation, route }) => {
 
                 <View style={styles.locationInfo}>
                   <Typography size="small" color={theme.palette.dark}>
-                    Avenida Dona Gertrudes, 100
+                    {showEndereco}
                   </Typography>
                 </View>
 
