@@ -42,8 +42,16 @@ export default function App() {
     dispatch(action);
   }
 
+  async function loadIdCliente() {
+    // TODO ao fazer login, salvar o idCliente
+    const idCliente = 1 // JSON.parse(await AsyncStorage.getItem('IdCliente'));
+    const action = { type: "createIdCliente", payload: idCliente };
+    dispatch(action);
+  }
+
   useEffect(() => {
     loadToken();
+    loadIdCliente();
     loadLocalization()
     loadCarrinho()
   }, [])

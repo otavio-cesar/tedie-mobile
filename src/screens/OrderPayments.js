@@ -1,7 +1,7 @@
-import React, { useRef } from 'react'
-import { 
-  StyleSheet, 
-  View, 
+import React, { useContext, useEffect, useRef, useState } from 'react'
+import {
+  StyleSheet,
+  View,
   TouchableOpacity
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
@@ -15,8 +15,37 @@ import ScreenContainer from '../components/ScreenContainer'
 import ContentContainer from '../components/ContentContainer'
 import Divider from '../components/Divider'
 import Button from '../components/Button'
+import { getCard } from '../services/card'
+import AsyncStorage from '@react-native-community/async-storage'
+import { CheckoutContext } from '../contexts/CheckoutContext'
+import { CartContext } from '../contexts/CartContext'
 
 const OrderPayments = ({ navigation }) => {
+  const [meiosPag, setMeiosPag] = useState([])
+  const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
+  const { cartState, cartDispatch } = useContext(CartContext);
+  
+  useEffect(() => {
+    loadMeiosPag()
+  }, [])
+
+  async function loadMeiosPag() {
+    const IdCliente = await AsyncStorage.getItem("idCliente")
+    const cartoes = await getCard(!IdCliente || IdCliente == "undefined" ? 1 : IdCliente)
+    console.log(cartoes)
+    setMeiosPag(cartoes)
+  }
+
+  async function selecionaCartao(card) {
+    card.opcao = 'credit'
+    const market = cartState.markets[checkoutState.selectedMarketIndex]
+    let he = { ...checkoutState.cartaoPorEstabelecimento }
+    he[`${market.IdEmpresa}`] = card
+    const action = { type: "setCartaoPorEstabelecimento", payload: { cartaoPorEstabelecimento: he } }
+    checkoutDispatch(action);
+    navigation.pop()
+  }
+
   const bottomSheetRef = useRef(null)
 
   const openBottomSheet = (ref) => {
@@ -39,7 +68,7 @@ const OrderPayments = ({ navigation }) => {
               </Typography>
             </View>
           </TouchableOpacity>
-  
+
           <View style={styles.bottomSheetActions}>
             <TouchableOpacity>
               <View style={styles.bottomSheetItem}>
@@ -51,7 +80,7 @@ const OrderPayments = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity>
               <View style={styles.bottomSheetItem}>
-                <Ionicons name="md-trash" size={25} color={theme.palette.primary} /> 
+                <Ionicons name="md-trash" size={25} color={theme.palette.primary} />
                 <Typography size="small" color={theme.palette.dark}>
                   Excluir
                 </Typography>
@@ -91,65 +120,33 @@ const OrderPayments = ({ navigation }) => {
 
             <Divider />
 
-            <View style={styles.lineSpaceContainer}>
-              <View style={styles.columnContainer}>
-                <Typography size="small" color={theme.palette.dark}>
-                  Cartão de Crédito/Débito
-                </Typography>
-                <Typography size="caption" color={theme.palette.light}>
-                  VISA **** 1234
-                </Typography>
-              </View>
-
-              <View style={styles.lineContainer}>
-                <Ionicons name="md-card" size={25} color={theme.palette.dark} />
-                <TouchableOpacity 
-                  style={styles.editButton} 
-                  hitSlop={styles.slope} 
-                  onPress={() => openBottomSheet(bottomSheetRef)}
-                >
-                  <Ionicons name="md-more" size={25} color={theme.palette.primary} />
+            {meiosPag.length > 0 && meiosPag.map((p, index) => (
+              <View style={styles.lineSpaceContainer} >
+                <TouchableOpacity onPress={() => selecionaCartao(p)} >
+                  <View style={styles.columnContainer}>
+                    <Typography size="small" color={theme.palette.dark}>
+                      Cartão de Crédito/Débito
+                  </Typography>
+                    <Typography size="caption" color={theme.palette.light}>
+                      {p.Bandeira} {p.Numero.split(" ").map((y, i) => { return i == 1 || i == 2 ? "****" : y }).join(" ")}
+                    </Typography>
+                  </View>
                 </TouchableOpacity>
-              </View>
-            </View>
 
-            <View style={styles.lineSpaceContainer}>
-              <View style={styles.columnContainer}>
-                <Typography size="small" color={theme.palette.dark}>
-                  Cartão de Crédito
-                </Typography>
-                <Typography size="caption" color={theme.palette.light}>
-                  MASTERCARD **** 4567 
-                </Typography>
+                <View style={styles.lineContainer}>
+                  <Ionicons name="md-card" size={25} color={theme.palette.dark} />
+                  <TouchableOpacity
+                    style={styles.editButton}
+                    hitSlop={styles.slope}
+                    onPress={() => openBottomSheet(bottomSheetRef)}
+                  >
+                    <Ionicons name="md-more" size={25} color={theme.palette.primary} />
+                  </TouchableOpacity>
+                </View>
               </View>
+            ))}
 
-              <View style={styles.lineContainer}>
-                <Ionicons name="md-card" size={25} color={theme.palette.dark} />
-                <TouchableOpacity style={styles.editButton}>
-                  <Ionicons name="md-more" size={25} color={theme.palette.primary} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.lineSpaceContainer}>
-              <View style={styles.columnContainer}>
-                <Typography size="small" color={theme.palette.dark}>
-                  Cartão de Débito
-                </Typography>
-                <Typography size="caption" color={theme.palette.light}>
-                  VISA **** 1234
-                </Typography>
-              </View>
-
-              <View style={styles.lineContainer}>
-                <Ionicons name="md-card" size={25} color={theme.palette.dark} />
-                <TouchableOpacity style={styles.editButton}>
-                  <Ionicons name="md-more" size={25} color={theme.palette.primary} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <Button 
+            <Button
               background={theme.palette.primary}
               color="#fff"
               width="100%"
@@ -192,8 +189,8 @@ const OrderPayments = ({ navigation }) => {
       </ScreenContainer>
 
       <BottomSheet
-        snapPoints = {[0, 1, 150]}
-        renderContent = {() => (<BotomSheetContent sheetRef={bottomSheetRef} />)}
+        snapPoints={[0, 1, 150]}
+        renderContent={() => (<BotomSheetContent sheetRef={bottomSheetRef} />)}
         ref={bottomSheetRef}
       />
     </React.Fragment>
@@ -221,11 +218,11 @@ const styles = StyleSheet.create({
   editButton: {
     marginLeft: 16
   },
-  slope: { 
-    top: 25, 
-    left: 25, 
-    bottom: 25, 
-    right: 25 
+  slope: {
+    top: 25,
+    left: 25,
+    bottom: 25,
+    right: 25
   },
   bottomSheetContainer: {
     width: '100%',

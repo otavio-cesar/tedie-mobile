@@ -19,19 +19,24 @@ import RadioButton from '../components/RadioButton'
 import Box from '../components/Box'
 import { CartContext } from '../contexts/CartContext'
 import { CheckoutContext } from '../contexts/CheckoutContext'
+import { AppContext } from '../contexts/AppContext'
+import { postPedido } from '../services/products'
 
 const Checkout = ({ navigation, route }) => {
   const [selectedPayment, setSelectedPayment] = useState("credit")
   const { cartState, cartDispatch } = useContext(CartContext);
   const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
-  const [showHorario, setShowHorario] = useState("Tipo de entrega-Horário")
+  const { state, dispatch } = useContext(AppContext);
+  const [showHorario, setShowHorario] = useState("Tipo de entrega-Horário-0")
   const [showEndereco, setShowEndereco] = useState("Selecione")
+  const [showCartao, setShowCartao] = useState("")
 
   useEffect(() => {
     console.log(cartState.markets)
     console.log(checkoutState.selectedMarketIndex)
     changeAddress()
     changeHorario()
+    changeCartao()
   }, [checkoutState.selectedMarketIndex])
 
   useEffect(() => {
@@ -44,6 +49,11 @@ const Checkout = ({ navigation, route }) => {
     changeAddress()
   }, [checkoutState.enderecoEntregaPorEstabelecimento])
 
+  useEffect(() => {
+    console.log(checkoutState.cartaoPorEstabelecimento)
+    changeCartao()
+  }, [checkoutState.cartaoPorEstabelecimento])
+
   async function changeAddress() {
     if (checkoutState.enderecoEntregaPorEstabelecimento.length == 0) return
     const market = cartState.markets[checkoutState.selectedMarketIndex]
@@ -55,7 +65,55 @@ const Checkout = ({ navigation, route }) => {
     if (checkoutState.horarioEntregaPorEstabelecimento.length == 0) return
     const market = cartState.markets[checkoutState.selectedMarketIndex]
     const selected = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]
-    setShowHorario(selected?.split('-').length > 0 ? selected: "Tipo de entrega-Horário")
+    setShowHorario(selected?.split('-').length > 0 ? selected : "Tipo de entrega-Horário-0")
+  }
+
+  async function changeCartao() {
+    if (checkoutState.cartaoPorEstabelecimento.length == 0) return
+    const market = cartState.markets[checkoutState.selectedMarketIndex]
+    const selected = checkoutState.cartaoPorEstabelecimento[market.IdEmpresa]
+    setShowCartao(selected)
+    if (selected)
+      setSelectedPayment(selected.opcao)
+  }
+
+  function selecionaOpcaoCartao(opcao) {
+    const market = cartState.markets[checkoutState.selectedMarketIndex]
+    let he = { ...checkoutState.cartaoPorEstabelecimento }
+    const cartao = he[`${market.IdEmpresa}`]
+    cartao.opcao = opcao
+    he[`${market.IdEmpresa}`] = cartao
+    const action = { type: "setCartaoPorEstabelecimento", payload: { cartaoPorEstabelecimento: he } }
+    checkoutDispatch(action);
+    setSelectedPayment(opcao)
+    // changeCartao()
+  }
+
+  async function fazerPedido() {
+    const idCliente = state.idCliente
+    cartState.markets.forEach(market => {
+      let Valor = cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`] +
+        (checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ? (+checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]) : 0)
+      let Cupom = 0// TODO
+      let TipoEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[0]
+      let Horario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[1]
+      let CEP = checkoutState.enderecoEntregaPorEstabelecimento[market.IdEmpresa].CEP
+      let OpcaoPagamento = checkoutState.cartaoPorEstabelecimento[market.IdEmpresa].opcao
+
+      let pedido = {
+        IdCliente: idCliente,
+        NumeroPedido: Math.random() * 9999,
+        Data: Date.now(),
+        Valor,
+        Cupom,
+        TipoEntrega,
+        Horario,
+        CEP,
+        FormaPagamento: OpcaoPagamento
+      }
+
+      postPedido(pedido)
+    });
   }
 
   return (
@@ -145,8 +203,10 @@ const Checkout = ({ navigation, route }) => {
                     Entrega
               </Typography>
                   <Typography size="small" color={theme.palette.light}>
-                    R$ 10,00
-              </Typography>
+                    R$ {checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ?
+                      (+checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]).toFixed(2).replace('.', ',')
+                      : "0,00"}
+                  </Typography>
                 </View>
 
                 <Divider />
@@ -156,8 +216,13 @@ const Checkout = ({ navigation, route }) => {
                     TOTAL
               </Typography>
                   <Typography size="medium" color={theme.palette.dark}>
-                    R$ 536,39
-              </Typography>
+                    R$ {
+                      (cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`]
+                        +
+                        (checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ? (+checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]) : 0)
+                      ).toFixed(2).replace('.', ',')
+                    }
+                  </Typography>
                 </View>
               </View>
             </ContentContainer>
@@ -201,7 +266,11 @@ const Checkout = ({ navigation, route }) => {
                     Cartão pelo TEDIE
                   </Typography>
                   <Typography size="small" color={theme.palette.light}>
-                    VISA **** 1234
+                    {showCartao &&
+                      <>
+                        {showCartao.Bandeira} {showCartao.Numero.split(" ").map((y, i) => { return i == 1 || i == 2 ? "****" : y }).join(" ")}
+                      </>
+                    }
                   </Typography>
                 </View>
 
@@ -212,7 +281,7 @@ const Checkout = ({ navigation, route }) => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setSelectedPayment("credit")}>
+            <TouchableOpacity onPress={() => selecionaOpcaoCartao("credit")}>
               <View style={styles.paymentMethodContainer}>
                 <Typography size="small" color={theme.palette.dark}>
                   Crédito
@@ -221,7 +290,7 @@ const Checkout = ({ navigation, route }) => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setSelectedPayment("debit")}>
+            <TouchableOpacity onPress={() => selecionaOpcaoCartao("debit")}>
               <View style={styles.paymentMethodContainer}>
                 <Typography size="small" color={theme.palette.dark}>
                   Débito
@@ -257,7 +326,7 @@ const Checkout = ({ navigation, route }) => {
           color="#fff"
           width="100%"
           text="Fazer pedido"
-          onPress={() => alert("wooohooo")}
+          onPress={() => fazerPedido()}
         />
       </ScreenContainer>
     </React.Fragment>

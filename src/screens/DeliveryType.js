@@ -44,7 +44,7 @@ const DeliveryType = ({ navigation }) => {
   }
 
   async function setSelectedHorario(horario) {
-    const horarioEntrega = `${horario.TIPOENTREGA}-${horario.horario}`
+    const horarioEntrega = `${horario.TIPOENTREGA}-${horario.horario}-${horario.TAXA}`
     setSelectedType(horarioEntrega)
 
     const market = cartState.markets[checkoutState.selectedMarketIndex]
@@ -52,6 +52,8 @@ const DeliveryType = ({ navigation }) => {
     he[`${market.IdEmpresa}`] = horarioEntrega
     const action = { type: "setHorarioEntregaPorEstabelecimento", payload: { horarioEntregaPorEstabelecimento: he } }
     checkoutDispatch(action);
+
+    navigation.pop()
   }
 
   return (
@@ -85,7 +87,7 @@ const DeliveryType = ({ navigation }) => {
                       <Typography size="small" color={theme.palette.light}>
                         {th.horario}
                       </Typography>
-                      <RadioButton selected={selectedType === `${th.TIPOENTREGA}-${th.horario}`} />
+                      <RadioButton selected={selectedType === `${th.TIPOENTREGA}-${th.horario}-${th.TAXA}`} />
                     </Box>
                   </TouchableOpacity>
                 ))}

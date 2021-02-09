@@ -1,5 +1,6 @@
-import React from 'react'
-import { StyleSheet, TouchableOpacity, TextInput, View } from 'react-native'
+import React, { useState } from 'react'
+import { StyleSheet, TouchableOpacity, TextInput, View, Picker } from 'react-native'
+// import {Picker } from 'react-native-community/picker'
 import { Ionicons } from '@expo/vector-icons'
 // component
 import Navbar from '../components/Navbar'
@@ -8,13 +9,41 @@ import Typography from '../components/Typography'
 import Button from '../components/Button'
 // theme
 import theme from '../theme'
+import { func } from 'prop-types'
+import { postCard } from '../services/card'
+import AsyncStorage from '@react-native-community/async-storage'
 
 const Card = ({ navigation }) => {
+  const [CVV, setCVV] = useState("")
+  const [Numero, setNumero] = useState("")
+  const [Validade, setValidade] = useState("")
+  const [CPF, setCPF] = useState("")
+  const [Titular, setTitular] = useState("")
+  const [IdBandeira, setIdBandeira] = useState("1");
+
+  async function salvarCartao() {
+    const IdCliente = await AsyncStorage.getItem("idCliente")
+
+    const cartao = {
+      IdCliente: !IdCliente || IdCliente == "undefined" ? 1 : IdCliente,
+      Numero,
+      Validade,
+      CPF,
+      Titular,
+      CVV, 
+      IdBandeira
+    }
+
+    await postCard(cartao)
+
+    navigation.pop()
+  }
+
   return (
     <React.Fragment>
       <Navbar
         left={
-          <TouchableOpacity 
+          <TouchableOpacity
             hitSlop={theme.hitSlop}
             onPress={() => navigation.pop()}
           >
@@ -29,37 +58,58 @@ const Card = ({ navigation }) => {
       />
 
       <ScreenContainer>
-        <TextInput 
+        <TextInput
           style={styles.textInput}
-          value="Número do Cartão"
+          value={Numero}
+          onChangeText={text => setNumero(text)}
+          placeholder="Número do Cartão"
         />
 
-        <TextInput 
+        <TextInput
           style={styles.textInput}
-          value="Validade"
+          onChangeText={text => setValidade(text)}
+          value={Validade}
+          placeholder="Validade"
         />
 
-        <TextInput 
+        <TextInput
           style={styles.textInput}
-          value="CVV"
+          onChangeText={text => setCVV(text)}
+          value={CVV}
+          placeholder="CVV"
         />
 
-        <TextInput 
+        <TextInput
           style={styles.textInput}
-          value="Nome do Titular"
+          onChangeText={text => setTitular(text)}
+          value={Titular}
+          placeholder="Nome do Titular"
         />
 
-        <TextInput 
+        <TextInput
           style={styles.textInput}
-          value="CPF / CNPJ"
+          onChangeText={text => setCPF(text)}
+          value={CPF}
+          placeholder="CPF / CNPJ"
         />
+
+        <Picker
+          selectedValue={IdBandeira}
+          style={styles.textInput}
+          // style={{ height: 50, width: 150 }}
+          onValueChange={(itemValue, itemIndex) => setIdBandeira(itemValue)}
+        >
+          <Picker.Item label="Visa" value="1" />
+          <Picker.Item label="Mastercard" value="2" />
+        </Picker>
 
         <View style={styles.confirmButton}>
-          <Button 
+          <Button
             background={theme.palette.secondary}
             color={theme.palette.primary}
             width="50%"
             text="Salvar"
+            onPress={salvarCartao}
           />
         </View>
       </ScreenContainer>

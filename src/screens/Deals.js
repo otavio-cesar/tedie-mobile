@@ -10,19 +10,6 @@ import { getProductsByCEP } from '../services/products'
 import { getLocationByLatLong } from '../services/locations'
 
 const Deals = ({ navigation }) => {
-  // const products = [
-  //   { name: 'Produto 01', price: 'R$ 50,35', hasOffer: true, off: '10%' },
-  //   { name: 'Produto 02', price: 'R$ 23,50', hasOffer: true, off: '20%' },
-  //   { name: 'Produto 03', price: 'R$ 79,99', hasOffer: true, off: '30%' },
-  //   { name: 'Produto 04', price: 'R$ 25,99', hasOffer: true, off: '15%' },
-  //   { name: 'Produto 05', price: 'R$ 43,50', hasOffer: true, off: '5%' },
-  //   { name: 'Produto 06', price: 'R$ 54,40', hasOffer: true, off: '7%' },
-  //   { name: 'Produto 07', price: 'R$ 89,99' },
-  //   { name: 'Produto 08', price: 'R$ 87,70' },
-  //   { name: 'Produto 09', price: 'R$ 41,20' },
-  //   { name: 'Produto 10', price: 'R$ 43,50' }
-  // ]
-
   const [products, setProducts] = useState([]);
   const [localizacao, setLocalizacao] = useState("");
 

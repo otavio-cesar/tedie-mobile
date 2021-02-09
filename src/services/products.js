@@ -1,5 +1,12 @@
 import { api, urlApi } from '../services/axios'
 
+export const postPedido = async (pedido) => {
+    await api().post(
+        `http://localhost:59618/api/Pedidos/Checkout`,
+        pedido
+    );
+}
+
 export const getProductsByCEP = async (CEP, categoria = "", offset = 0, limite = 999, searchQuery = "") => {
     const response = await api().get(
         `${urlApi}produtos/CEPCategoriaPaginado?CEP=${CEP}&Categoria=${categoria}&offset=${offset}&limite=${limite}&searchQuery=${searchQuery}`,

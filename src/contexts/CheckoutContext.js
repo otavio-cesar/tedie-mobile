@@ -14,6 +14,8 @@ export const appCheckoutReducer = (state, action) => {
             return { ...state, horarioEntregaPorEstabelecimento: action.payload.horarioEntregaPorEstabelecimento }
         case 'setEnderecoEntregaPorEstabelecimento':
             return { ...state, enderecoEntregaPorEstabelecimento: action.payload.enderecoEntregaPorEstabelecimento }
+        case 'setCartaoPorEstabelecimento':
+            return { ...state, cartaoPorEstabelecimento: action.payload.cartaoPorEstabelecimento }
 
         default:
             return state;
@@ -25,5 +27,6 @@ export const checkoutInitialState = {
     opcaoPagamento: undefined,
     cupom: undefined,
     horarioEntregaPorEstabelecimento: [],
-    enderecoEntregaPorEstabelecimento: []
+    enderecoEntregaPorEstabelecimento: [],
+    cartaoPorEstabelecimento: []
 }
