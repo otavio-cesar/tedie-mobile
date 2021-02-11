@@ -90,7 +90,7 @@ const Checkout = ({ navigation, route }) => {
   }
 
   async function fazerPedido() {
-    const idCliente = state.idCliente
+    const idCliente = state.sessao.IdCliente
     cartState.markets.forEach(market => {
       let Valor = cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`] +
         (checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ? (+checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]) : 0)

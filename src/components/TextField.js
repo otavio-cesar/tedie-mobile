@@ -5,7 +5,7 @@ import { Hoshi } from 'react-native-textinput-effects'
 // theme 
 import theme from '../theme'
 
-const TextField = ({ width, label, labelColor, borderColor, backgroundColor, keyboardType, returnKeyType, onEndEditing, useContainerWidth, value }) => {
+const TextField = ({ width, label, labelColor, borderColor, backgroundColor, keyboardType, returnKeyType, onEndEditing, useContainerWidth, value, setValue }) => {
   const propWidth = width ? Number.parseInt(width.replace('%', '')) : null
   const fieldWidth = width ? ((Dimensions.get('window').width * (propWidth / 100)) - 20) : null
   const windowSizeWidth = (Dimensions.get('window').width - 24)
@@ -27,7 +27,8 @@ const TextField = ({ width, label, labelColor, borderColor, backgroundColor, key
       returnKeyType={returnKeyType}
       onEndEditing={onEndEditing}
       value={inputValue}
-      onChange={(value) => setInputValue(value)}
+      onChange={(value) => { setInputValue(value.target.value); setValue(value.target.value) }}
+      onEndEditing={onEndEditing}
     />
   )
 }
@@ -42,12 +43,12 @@ const styles = StyleSheet.create({
   }
 })
 
-TextField.propTypes = { 
+TextField.propTypes = {
   width: PropTypes.string,
-  label: PropTypes.string.isRequired, 
-  backgroundColor: PropTypes.string, 
-  keyboardType: PropTypes.string, 
-  returnKeyType: PropTypes.string, 
+  label: PropTypes.string.isRequired,
+  backgroundColor: PropTypes.string,
+  keyboardType: PropTypes.string,
+  returnKeyType: PropTypes.string,
   onEndEditing: PropTypes.func,
   value: PropTypes.string
 }

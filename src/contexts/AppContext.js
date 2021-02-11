@@ -11,8 +11,8 @@ export const appReducer = (state, action) => {
             return loadCarrinho(state, action)
         case 'createAddress':
             return createAddress(state, action)
-        case 'createIdCliente':
-            return createIdCliente(state, action)
+        case 'createSessao':
+            return createSessao(state, action)
         case 'getToken':
             return { ...state, token: action.payload }
         default:
@@ -24,7 +24,7 @@ export const initialState = {
     token: undefined,
     address: undefined,
     carrinho: new Array(),
-    idCliente: undefined
+    sessao: undefined
 }
 
 function createCarrinho(state, action) {
@@ -49,10 +49,10 @@ function createAddress(state, action) {
     return { ...state, address: local }
 }
 
-function createIdCliente(state, action) {
-    const idCliente = action.payload.idCliente
-    AsyncStorage.setItem("idCliente", JSON.stringify(idCliente))
-    return { ...state, idCliente }
+function createSessao(state, action) {
+    const sessao = action.payload.sessao
+    AsyncStorage.setItem("sessao", JSON.stringify(sessao))
+    return { ...state, sessao }
 }
 
 export const convergeCep = (local) => {

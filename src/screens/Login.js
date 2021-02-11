@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { StyleSheet, View, Text, StatusBar, TouchableOpacity } from 'react-native'
 // theme
 import TextField from '../components/TextField'
@@ -6,17 +6,46 @@ import Box from '../components/Box'
 import Button from '../components/Button'
 import theme from '../theme'
 import Typography from '../components/Typography'
+import { login } from '../services/clients'
+import { AppContext } from '../contexts/AppContext'
+import Toast from 'react-native-easy-toast'
 
 const Login = ({ navigation }) => {
   const [activePage, setActivePage] = useState('login')
+  const [usuario, setUsuario] = useState('')
+  const [senha, setSenha] = useState('')
+  const toastRef = useRef();
+  const { state, dispatch } = useContext(AppContext);
+
+  async function handleLogin() {
+    const resp = await login(usuario, senha)
+    if (resp.IdCliente && resp.token) {
+      const action = { type: "createSessao", payload: { sessao: { IdCliente: resp.IdCliente, Token: resp.token } } }
+      dispatch(action)
+      navigation.navigate('Tabs')
+    } else {
+      toastRef.current?.show('Usuário ou senha inválidos', 3000)
+    }
+  }
+
+  useEffect(() => {
+    if (state.sessao)
+      navigation.navigate('Tabs')
+  })
 
   return (
     <React.Fragment>
+
+      <Toast ref={toastRef}
+        style={{ backgroundColor: 'white' }}
+        opacity={0.8}
+        textStyle={{ color: 'black' }} />
+
       {activePage === 'login' && (
         <View style={styles.container}>
           <StatusBar backgroundColor={theme.palette.primary} />
 
-          <Box direction="column" justify="center" alignItems="center"> 
+          <Box direction="column" justify="center" alignItems="center">
             <Text style={styles.logoPlaceholder}>
               TEDIE
             </Text>
@@ -25,27 +54,31 @@ const Login = ({ navigation }) => {
               Simples Assim!
             </Typography>
           </Box>
-          
+
           <TextField
             width="100%"
             label="E-mail ou CPF"
             labelColor="#fff"
             borderColor={theme.palette.secondary}
+            value={usuario}
+            setValue={setUsuario}
           />
           <TextField
             width="100%"
             label="Senha"
             labelColor="#fff"
             borderColor={theme.palette.secondary}
+            value={senha}
+            setValue={setSenha}
           />
 
           <Box direction="row" justify="center" alignItems="center">
-            <Button 
+            <Button
               background="#fff"
               color={theme.palette.primary}
               width="80%"
               text="Entrar"
-              onPress={() => navigation.navigate('Tabs')}
+              onPress={() => handleLogin()}
             />
           </Box>
 
@@ -63,12 +96,12 @@ const Login = ({ navigation }) => {
         <View style={styles.container}>
           <StatusBar backgroundColor={theme.palette.primary} />
 
-          <Box direction="column" justify="center" alignItems="center"> 
+          <Box direction="column" justify="center" alignItems="center">
             <Typography size="small" color={theme.palette.secondary}>
               Cadastre-se no TEDIE!
             </Typography>
           </Box>
-          
+
           <Box direction="row" justify="center" alignItems="center">
             <TextField
               width="50%"
@@ -82,7 +115,7 @@ const Login = ({ navigation }) => {
               labelColor="#fff"
               borderColor={theme.palette.secondary}
             />
-          </Box> 
+          </Box>
 
           <TextField
             width="100%"
@@ -120,7 +153,7 @@ const Login = ({ navigation }) => {
           />
 
           <Box direction="row" justify="center" alignItems="center">
-            <Button 
+            <Button
               background="#fff"
               color={theme.palette.primary}
               width="80%"
@@ -139,7 +172,7 @@ const Login = ({ navigation }) => {
         </View>
       )}
     </React.Fragment>
-    
+
   )
 }
 
