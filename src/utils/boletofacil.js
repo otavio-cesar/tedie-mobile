@@ -1,3 +1,5 @@
+import Axios from "axios";
+
 (function (window) {
     var Juno = window.Juno || {};
     window.Juno = Juno;
@@ -448,19 +450,14 @@
     window.DirectCheckout = DirectCheckout;
 })(window);
 
-var checkout = new DirectCheckout('7ACA5244C520E4641C6E636E11AE9F05B0747F870CD202891BAD9DD415D7DE53', false); /* Em sandbox utilizar o construtor new DirectCheckout('SEU TOKEN PUBLICO', false); */
-var cardData = {
-    cardNumber: '0000000000000000',
-    holderName: 'Nome do Titular do Cartão',
-    securityCode: '000',
-    expirationMonth: '12',
-    expirationYear: '2045'
-};
+export function geraCheckoutAPI() {
+    var checkout = new DirectCheckout('7ACA5244C520E4641C6E636E11AE9F05B0747F870CD202891BAD9DD415D7DE53', false); /* Em sandbox utilizar o construtor new DirectCheckout('SEU TOKEN PUBLICO', false); */
+    return checkout;
+}
 
-checkout.getCardHash(cardData, function (cardHash) {
-    console.log('cardHash')
-    /* Sucesso - A variável cardHash conterá o hash do cartão de crédito */
-}, function (error) {
-    console.log('error')
-    /* Erro - A variável error conterá o erro ocorrido ao obter o hash */
-});
+export const fazPagamentoJuno = async (token, descricao, valor, nomepessoa, cpf) => {
+    const response = await Axios.get(
+        `https://sandbox.boletobancario.com/boletofacil/integration/api/v1/issue-charge?token=${token}&description=${descricao}&amount=${valor}&payerName=${nomepessoa}&payerCpfCnpj=${cpf}`
+    ).catch(e => { console.log(e.message); })
+    return response
+}

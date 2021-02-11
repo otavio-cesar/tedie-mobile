@@ -21,6 +21,7 @@ import { CartContext } from '../contexts/CartContext'
 import { CheckoutContext } from '../contexts/CheckoutContext'
 import { AppContext } from '../contexts/AppContext'
 import { postPedido } from '../services/products'
+import { geraCheckoutAPI, fazPagamentoJuno } from '../utils/boletofacil'
 
 const Checkout = ({ navigation, route }) => {
   const [selectedPayment, setSelectedPayment] = useState("credit")
@@ -86,7 +87,6 @@ const Checkout = ({ navigation, route }) => {
     const action = { type: "setCartaoPorEstabelecimento", payload: { cartaoPorEstabelecimento: he } }
     checkoutDispatch(action);
     setSelectedPayment(opcao)
-    // changeCartao()
   }
 
   async function fazerPedido() {
@@ -94,7 +94,7 @@ const Checkout = ({ navigation, route }) => {
     cartState.markets.forEach(market => {
       let Valor = cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`] +
         (checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ? (+checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]) : 0)
-      let Cupom = 0// TODO
+      let Cupom = ""// TODO
       let TipoEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[0]
       let Horario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[1]
       let CEP = checkoutState.enderecoEntregaPorEstabelecimento[market.IdEmpresa].CEP
@@ -102,8 +102,8 @@ const Checkout = ({ navigation, route }) => {
 
       let pedido = {
         IdCliente: idCliente,
-        NumeroPedido: Math.random() * 9999,
-        Data: Date.now(),
+        NumeroPedido: (Math.random() * 1000000).toFixed(0),
+        Data: "11/02/2020",
         Valor,
         Cupom,
         TipoEntrega,
@@ -113,7 +113,40 @@ const Checkout = ({ navigation, route }) => {
       }
 
       postPedido(pedido)
+
+      postPagamento(pedido, market.IdEmpresa)
     });
+  }
+
+  const fazPagamento = (cartao, pedido) => {
+    let checkout = geraCheckoutAPI()
+
+    checkout.getCardHash(cartao, function (cardHash) {
+      console.log('cardHash')
+      /* Sucesso - A variável cardHash conterá o hash do cartão de crédito */
+      fazPagamentoJuno(cardHash, pedido.NumeroPedido, pedido.Valor, "nomepessoas", "cpf")
+    }, function (error) {
+      console.log('error')
+      /* Erro - A variável error conterá o erro ocorrido ao obter o hash */
+    });
+  }
+
+  const errorAoPagar = (error) => {
+    console.log(error)
+  }
+
+  async function postPagamento(pedido, IdEmpresa) {
+    const cartao = checkoutState.cartaoPorEstabelecimento[IdEmpresa]
+
+    var cardData = {
+      cardNumber: cartao.Numero.split(' ').join(""),
+      holderName: cartao.Titular,
+      securityCode: cartao.CVV.trim(),
+      expirationMonth: cartao.Validade.split('/')[0],
+      expirationYear: cartao.Validade.split('/')[1]
+    };
+
+    fazPagamento(cardData, pedido)
   }
 
   return (

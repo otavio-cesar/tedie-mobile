@@ -34,7 +34,6 @@
     "react-native-svg": "^12.1.0",
     "react-native-textinput-effects": "^0.6.1",
     "react-native-web": "~0.11.7",
-    "react-script-tag": "^1.1.2",
     "reanimated-bottom-sheet": "^1.0.0-alpha.20"
   },
   "devDependencies": {

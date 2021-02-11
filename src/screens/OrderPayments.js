@@ -30,7 +30,7 @@ const OrderPayments = ({ navigation }) => {
   }, [])
 
   async function loadMeiosPag() {
-    const sessao = await AsyncStorage.getItem("sessao")
+    const sessao = JSON.parse(await AsyncStorage.getItem("sessao"))
     const cartoes = await getCard(sessao.IdCliente)
     console.log(cartoes)
     setMeiosPag(cartoes)

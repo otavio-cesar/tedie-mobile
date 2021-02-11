@@ -22,10 +22,10 @@ const Card = ({ navigation }) => {
   const [IdBandeira, setIdBandeira] = useState("1");
 
   async function salvarCartao() {
-    const IdCliente = await AsyncStorage.getItem("idCliente")
+    const sessao = JSON.parse(await AsyncStorage.getItem("sessao"))
 
     const cartao = {
-      IdCliente: !IdCliente || IdCliente == "undefined" ? 1 : IdCliente,
+      IdCliente: sessao.IdCliente,
       Numero,
       Validade,
       CPF,
