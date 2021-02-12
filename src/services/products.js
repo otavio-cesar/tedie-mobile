@@ -2,6 +2,14 @@ import { api, urlApi } from '../services/axios'
 
 export const postPedido = async (pedido) => {
     await api().post(
+        `http://localhost:59618/api/Pedidos`,
+        pedido
+    );
+}
+
+// Atualiza status para F
+export const postCheckout = async (pedido) => {
+    await api().post(
         `http://localhost:59618/api/Pedidos/Checkout`,
         pedido
     );

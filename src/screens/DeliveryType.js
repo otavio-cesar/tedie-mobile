@@ -44,7 +44,7 @@ const DeliveryType = ({ navigation }) => {
   }
 
   async function setSelectedHorario(horario) {
-    const horarioEntrega = `${horario.TIPOENTREGA}-${horario.horario}-${horario.TAXA}`
+    const horarioEntrega = `${horario.TIPOENTREGA}-${horario.horario}-${horario.TAXA}-${horario.identrega}-${horario.horacod}`
     setSelectedType(horarioEntrega)
 
     const market = cartState.markets[checkoutState.selectedMarketIndex]

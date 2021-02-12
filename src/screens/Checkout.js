@@ -28,7 +28,7 @@ const Checkout = ({ navigation, route }) => {
   const { cartState, cartDispatch } = useContext(CartContext);
   const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
   const { state, dispatch } = useContext(AppContext);
-  const [showHorario, setShowHorario] = useState("Tipo de entrega-Horário-0")
+  const [showHorario, setShowHorario] = useState("Tipo de entrega-Horário-0-0")
   const [showEndereco, setShowEndereco] = useState("Selecione")
   const [showCartao, setShowCartao] = useState("")
 
@@ -66,7 +66,7 @@ const Checkout = ({ navigation, route }) => {
     if (checkoutState.horarioEntregaPorEstabelecimento.length == 0) return
     const market = cartState.markets[checkoutState.selectedMarketIndex]
     const selected = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]
-    setShowHorario(selected?.split('-').length > 0 ? selected : "Tipo de entrega-Horário-0")
+    setShowHorario(selected?.split('-').length > 0 ? selected : "Tipo de entrega-Horário-0-0-0")
   }
 
   async function changeCartao() {
@@ -92,26 +92,38 @@ const Checkout = ({ navigation, route }) => {
   async function fazerPedido() {
     const idCliente = state.sessao.IdCliente
     cartState.markets.forEach(market => {
+      const endereco = checkoutState.enderecoEntregaPorEstabelecimento[market.IdEmpresa]
+      const IdCartao = checkoutState.cartaoPorEstabelecimento[market.IdEmpresa].IdCartao
       let Valor = cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`] +
         (checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ? (+checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]) : 0)
-      let Cupom = ""// TODO
-      let TipoEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[0]
-      let Horario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[1]
+      let IdCupom = 0// TODO
+      // let TipoEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[0]
+      let IdTipoEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[3]
+      let Taxa = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]
+      // let Horario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[1]
+      let IdHorario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[4]
       let CEP = checkoutState.enderecoEntregaPorEstabelecimento[market.IdEmpresa].CEP
       let OpcaoPagamento = checkoutState.cartaoPorEstabelecimento[market.IdEmpresa].opcao
 
       let pedido = {
         IdCliente: idCliente,
         NumeroPedido: (Math.random() * 1000000).toFixed(0),
-        Data: "11/02/2020",
+        Data: new Date().toLocaleDateString(),
         Valor,
-        Cupom,
-        TipoEntrega,
-        Horario,
-        CEP,
-        FormaPagamento: OpcaoPagamento
+        IdCupom,
+        // TipoEntrega,
+        IdTipoEntrega,
+        // Horario,
+        IdHorario,
+        // CEP,
+        IdCartao,
+        Taxa,
+        IdFormaPagamento: null,
+        IdEndereco: endereco.IdEndereco,
+        FormaPagamento: OpcaoPagamento,
+        Observacao:""
       }
-
+      debugger
       postPedido(pedido)
 
       postPagamento(pedido, market.IdEmpresa)
