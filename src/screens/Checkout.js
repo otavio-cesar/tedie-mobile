@@ -28,27 +28,33 @@ const Checkout = ({ navigation, route }) => {
   const { cartState, cartDispatch } = useContext(CartContext);
   const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
   const { state, dispatch } = useContext(AppContext);
-  const [showHorario, setShowHorario] = useState("Tipo de entrega-Horário-0-0")
+  // const [showHorario, setShowHorario] = useState("Tipo de entrega-Horário-0-0")
   const [showEndereco, setShowEndereco] = useState("Selecione")
   const [showCartao, setShowCartao] = useState("")
+  const [cupom, setCupom] = useState("")
 
   useEffect(() => {
     console.log(cartState.markets)
     console.log(checkoutState.selectedMarketIndex)
     changeAddress()
-    changeHorario()
+    //changeHorario()
     changeCartao()
   }, [checkoutState.selectedMarketIndex])
 
-  useEffect(() => {
-    console.log(checkoutState.horarioEntregaPorEstabelecimento)
-    changeHorario()
-  }, [checkoutState.horarioEntregaPorEstabelecimento])
+  // useEffect(() => {
+  //   console.log(checkoutState.horarioEntregaPorEstabelecimento)
+  //   changeHorario()
+  // }, [checkoutState.horarioEntregaPorEstabelecimento])
 
   useEffect(() => {
     console.log(checkoutState.enderecoEntregaPorEstabelecimento)
     changeAddress()
   }, [checkoutState.enderecoEntregaPorEstabelecimento])
+
+  useEffect(() => {
+    console.log(checkoutState.cupom)
+    setCupom(checkoutState.cupom)
+  }, [checkoutState.cupom])
 
   useEffect(() => {
     console.log(checkoutState.cartaoPorEstabelecimento)
@@ -57,16 +63,15 @@ const Checkout = ({ navigation, route }) => {
 
   async function changeAddress() {
     if (checkoutState.enderecoEntregaPorEstabelecimento.length == 0) return
-    const market = cartState.markets[checkoutState.selectedMarketIndex]
-    const selected = checkoutState.enderecoEntregaPorEstabelecimento[market.IdEmpresa]
+    const selected = checkoutState.enderecoEntregaPorEstabelecimento[0]
     setShowEndereco(selected?.Beautify ?? "Selecione")
   }
 
-  async function changeHorario() {
+  function changeHorario(IdEmpresa) {
     if (checkoutState.horarioEntregaPorEstabelecimento.length == 0) return
-    const market = cartState.markets[checkoutState.selectedMarketIndex]
-    const selected = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]
-    setShowHorario(selected?.split('-').length > 0 ? selected : "Tipo de entrega-Horário-0-0-0")
+    const selected = checkoutState.horarioEntregaPorEstabelecimento[IdEmpresa]
+    const ret = selected?.split('-').length > 0 ? selected : "Tipo de entrega-Horário-0-0-0"
+    return ret
   }
 
   async function changeCartao() {
@@ -79,33 +84,38 @@ const Checkout = ({ navigation, route }) => {
   }
 
   function selecionaOpcaoCartao(opcao) {
-    const market = cartState.markets[checkoutState.selectedMarketIndex]
-    let he = { ...checkoutState.cartaoPorEstabelecimento }
-    const cartao = he[`${market.IdEmpresa}`]
-    cartao.opcao = opcao
-    he[`${market.IdEmpresa}`] = cartao
-    const action = { type: "setCartaoPorEstabelecimento", payload: { cartaoPorEstabelecimento: he } }
-    checkoutDispatch(action);
-    setSelectedPayment(opcao)
+    if ('credit') {
+      const market = cartState.markets[checkoutState.selectedMarketIndex]
+      let he = { ...checkoutState.cartaoPorEstabelecimento }
+      const cartao = he[`${market.IdEmpresa}`]
+      cartao.opcao = opcao
+      he[`${market.IdEmpresa}`] = cartao
+      const action = { type: "setCartaoPorEstabelecimento", payload: { cartaoPorEstabelecimento: he } }
+      checkoutDispatch(action);
+      setSelectedPayment(opcao)
+    }
   }
 
   async function fazerPedido() {
     const idCliente = state.sessao.IdCliente
+    
     cartState.markets.forEach(market => {
-      const endereco = checkoutState.enderecoEntregaPorEstabelecimento[market.IdEmpresa]
+      const endereco = checkoutState.enderecoEntregaPorEstabelecimento[0]
       const IdCartao = checkoutState.cartaoPorEstabelecimento[market.IdEmpresa].IdCartao
       let Valor = cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`] +
         (checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ? (+checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]) : 0)
-      let IdCupom = 0// TODO
+      let IdCupom = market.IdEmpresa == cupom.IdEmpresa ? cupom.IdCupom : 0
+      let Desconto = market.IdEmpresa == cupom.Valor ? cupom.IdCupom : 0
       // let TipoEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[0]
       let IdTipoEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[3]
       let Taxa = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]
       // let Horario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[1]
       let IdHorario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[4]
-      let CEP = checkoutState.enderecoEntregaPorEstabelecimento[market.IdEmpresa].CEP
+      let CEP = endereco.CEP
       let OpcaoPagamento = checkoutState.cartaoPorEstabelecimento[market.IdEmpresa].opcao
-
+      
       let pedido = {
+        IdEmpresa: market.IdEmpresa,
         IdCliente: idCliente,
         NumeroPedido: (Math.random() * 1000000).toFixed(0),
         Data: new Date().toLocaleDateString(),
@@ -121,12 +131,13 @@ const Checkout = ({ navigation, route }) => {
         IdFormaPagamento: null,
         IdEndereco: endereco.IdEndereco,
         FormaPagamento: OpcaoPagamento,
-        Observacao:""
+        Observacao: "",
+        Desconto
       }
       debugger
       postPedido(pedido)
 
-      postPagamento(pedido, market.IdEmpresa)
+      // postPagamento(pedido, market.IdEmpresa)
     });
   }
 
@@ -177,26 +188,7 @@ const Checkout = ({ navigation, route }) => {
       />
 
       <ScreenContainer>
-        {/* Delivery mode */}
-        <ContentContainer>
-          <TouchableOpacity onPress={() => navigation.navigate("Entrega")}>
-            <Box direction="row" justify="space-between" alignItems="center">
-              <Box direction="column" justify="center" alignItems="flex-start">
-                <Typography size="small" color={theme.palette.light}>
-                  {showHorario?.split('-').length > 0 ? showHorario.split('-')[0] : "Tipo de entrega"}
-                </Typography>
-                <Typography size="small" color={theme.palette.dark}>
-                  {showHorario?.split('-').length > 0 ? showHorario.split('-')[1] : "Horário"}
-                </Typography>
-              </Box>
 
-              <Typography size="small" color={theme.palette.primary}>
-                Trocar
-              </Typography>
-            </Box>
-          </TouchableOpacity>
-        </ContentContainer>
-        {/* End delivery mode */}
 
         {/* Delivery Location */}
         <ContentContainer>
@@ -222,10 +214,9 @@ const Checkout = ({ navigation, route }) => {
         </ContentContainer>
         {/* End Delivery Location */}
 
-        {/* Prices and Totals */}
-
         {cartState.markets.length > 0 && cartState.markets.map((market, index) => (
-          <TouchableOpacity onPress={() => checkoutDispatch({ type: "setSelectedMarketIndex", payload: { selectedMarketIndex: index } })}>
+          <View>
+            {/* TouchableOpacity onPress={() => checkoutDispatch({ type: "setSelectedMarketIndex", payload: { selectedMarketIndex: index } }) */}
             <ContentContainer>
               <View style={styles.pricesOuterContiner}>
                 <Typography size="large" color={theme.palette.dark}>
@@ -271,21 +262,40 @@ const Checkout = ({ navigation, route }) => {
                 </View>
               </View>
             </ContentContainer>
-          </TouchableOpacity>
+
+            <ContentContainer>
+              <TouchableOpacity onPress={() => navigation.navigate("Entrega", { IdEmpresa: market.IdEmpresa })}>
+                <Box direction="row" justify="space-between" alignItems="center">
+                  <Box direction="column" justify="center" alignItems="flex-start">
+                    <Typography size="small" color={theme.palette.light}>
+                      {checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ? changeHorario(market.IdEmpresa)?.split('-')[0] : "Tipo de entrega"}
+                    </Typography>
+                    <Typography size="small" color={theme.palette.dark}>
+                      {checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ? changeHorario(market.IdEmpresa)?.split('-')[1] : "Horário"}
+                    </Typography>
+                  </Box>
+
+                  <Typography size="small" color={theme.palette.primary}>
+                    Trocar
+              </Typography>
+                </Box>
+              </TouchableOpacity>
+            </ContentContainer>
+          </View>
         ))}
-
-
-        {/* End Prices and Totals */}
 
         {/* Coupons */}
         <TouchableOpacity onPress={() => navigation.navigate('Cupons')}>
           <ContentContainer>
             <View style={styles.couponContainer}>
-              <Ionicons name="md-pricetag" size={25} color={theme.palette.light} />
+              <Ionicons name="md-pricetag" size={25} color={cupom ? theme.palette.primary : theme.palette.light} />
 
               <View style={styles.couponTextContainer}>
                 <Typography size="small" color={theme.palette.light}>
-                  Selecionar Cupom
+                  {cupom ?
+                    `${cupom?.NomeCupom} - R$ ${cupom?.Valor.toFixed(2).replace('.', ',')}`
+                    : "Selecionar Cupom"
+                  }
                 </Typography>
               </View>
 
@@ -304,43 +314,37 @@ const Checkout = ({ navigation, route }) => {
 
             <Divider />
 
-            <TouchableOpacity onPress={() => navigation.navigate('Pagamentos')}>
-              <View style={styles.paymentMethodContainer}>
-                <View style={styles.paymentContainer}>
-                  <Typography size="small" color={theme.palette.dark}>
-                    Cartão pelo TEDIE
+            <View style={styles.paymentMethodContainer}>
+              <View style={styles.paymentContainer}>
+                <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => selecionaOpcaoCartao("credit")}>
+                  <RadioButton selected={selectedPayment === "credit"} />
+                  <View>
+                    <Typography size="small" color={theme.palette.dark}>
+                      Cartão pelo TEDIE
                   </Typography>
-                  <Typography size="small" color={theme.palette.light}>
-                    {showCartao &&
-                      <>
-                        {showCartao.Bandeira} {showCartao.Numero.split(" ").map((y, i) => { return i == 1 || i == 2 ? "****" : y }).join(" ")}
-                      </>
-                    }
-                  </Typography>
-                </View>
-
-
+                    <Typography size="small" color={theme.palette.light}>
+                      {showCartao &&
+                        <>
+                          {showCartao.Bandeira} {showCartao.Numero.split(" ").map((y, i) => { return i == 1 || i == 2 ? "****" : y }).join(" ")}
+                        </>
+                      }
+                    </Typography>
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity onPress={() => navigation.navigate('Pagamentos')}>
                 <Typography size="small" color={theme.palette.primary}>
                   Trocar
                 </Typography>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity onPress={() => selecionaOpcaoCartao("credit")}>
+            <TouchableOpacity onPress={() => selecionaOpcaoCartao("picpay")}>
               <View style={styles.paymentMethodContainer}>
+                <RadioButton selected={selectedPayment === "picpay"} />
                 <Typography size="small" color={theme.palette.dark}>
-                  Crédito
+                  Picpay
                 </Typography>
-                <RadioButton selected={selectedPayment === "credit"} />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => selecionaOpcaoCartao("debit")}>
-              <View style={styles.paymentMethodContainer}>
-                <Typography size="small" color={theme.palette.dark}>
-                  Débito
-                </Typography>
-                <RadioButton selected={selectedPayment === "debit"} />
               </View>
             </TouchableOpacity>
 
@@ -374,7 +378,7 @@ const Checkout = ({ navigation, route }) => {
           onPress={() => fazerPedido()}
         />
       </ScreenContainer>
-    </React.Fragment>
+    </React.Fragment >
   )
 }
 
