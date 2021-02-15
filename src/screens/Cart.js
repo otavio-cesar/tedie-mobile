@@ -83,7 +83,7 @@ const Cart = ({ navigation }) => {
 
   function calculaValorItem(idProduto, quantity) {
     let valor = 0;
-
+    if (produtosAtacado.length == 0) return
     let pAtacado = produtosAtacado
       .filter(p => p.Id == idProduto)
       .filter(p => p.Qtde_Inicial <= quantity && p.Qtde_Final >= quantity)[0]
@@ -108,7 +108,7 @@ const Cart = ({ navigation }) => {
 
   return (
     <React.Fragment>
-      <MainNavbar />
+      <MainNavbar navigation={navigation} />
       <View style={styles.cartsContainer}>
         <Box direction="row" justify="flex-start" alignItems="center">
           <Typography size="medium" color={theme.palette.dark}>
@@ -124,6 +124,7 @@ const Cart = ({ navigation }) => {
           {cartState.markets.length > 0 && cartState.markets.map((market, index) => (
             <TouchableOpacity onPress={() => handleSelectMarket(market)}>
               <Avatar
+                image={market.Logo}
                 key={index + "-" + market.IdEmpresa}
                 styles={styles.cartImage}
                 size={60}

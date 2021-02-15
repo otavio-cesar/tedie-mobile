@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useContext } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
@@ -9,11 +9,13 @@ import Typography from '../components/Typography'
 import CouponItem from '../components/CouponItem'
 // services
 import { getCoupons } from '../services/coupons'
+import { CheckoutContext } from '../contexts/CheckoutContext'
 
 const Coupons = ({ navigation }) => {
   const [couponsLoader, setCouponsLoader] = useState(false)
   const [coupons, setCoupons] = useState([])
-
+  const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
+  
   const loadCoupons = useCallback(async () => {
     setCouponsLoader(true)
 
@@ -21,11 +23,18 @@ const Coupons = ({ navigation }) => {
     setCoupons(couponsResponse)
 
     setCouponsLoader(false)
-  }, [setCouponsLoader,setCoupons, getCoupons])
+  }, [setCouponsLoader, setCoupons, getCoupons])
 
   useEffect(() => {
     loadCoupons()
   }, [loadCoupons])
+
+  async function selecionaCupom(cupom) {
+    const action = { type: "setCupom", payload: { cupom } }
+    checkoutDispatch(action);
+
+    navigation.pop()
+  }
 
   return (
     <React.Fragment>
@@ -43,14 +52,16 @@ const Coupons = ({ navigation }) => {
       />
 
       <ScreenContainer>
-        {coupons.length > 0 && !couponsLoader 
+        {coupons.length > 0 && !couponsLoader
           && coupons.map(coupon => (
-            <CouponItem 
-              key={coupon.IdCupom}
-              coupon={coupon} 
-            />
+            <TouchableOpacity onPress={() => selecionaCupom(coupon)}>
+              <CouponItem
+                key={coupon.IdCupom}
+                coupon={coupon}
+              />
+            </TouchableOpacity>
           )
-        )}
+          )}
       </ScreenContainer>
     </React.Fragment>
   )

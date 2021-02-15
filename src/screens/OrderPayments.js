@@ -38,9 +38,8 @@ const OrderPayments = ({ navigation }) => {
 
   async function selecionaCartao(card) {
     card.opcao = 'credit'
-    const market = cartState.markets[checkoutState.selectedMarketIndex]
     let he = { ...checkoutState.cartaoPorEstabelecimento }
-    he[`${market.IdEmpresa}`] = card
+    he[`${0}`] = card
     const action = { type: "setCartaoPorEstabelecimento", payload: { cartaoPorEstabelecimento: he } }
     checkoutDispatch(action);
     navigation.pop()
@@ -156,7 +155,7 @@ const OrderPayments = ({ navigation }) => {
           </View>
         </ContentContainer>
 
-        <ContentContainer>
+        {/* <ContentContainer>
           <View style={styles.columnContainer}>
             <Typography size="medium" color={theme.palette.dark}>
               Pagamento na Entrega
@@ -185,7 +184,7 @@ const OrderPayments = ({ navigation }) => {
               <Ionicons name="md-cash" size={25} color={theme.palette.dark} />
             </View>
           </View>
-        </ContentContainer>
+        </ContentContainer> */}
       </ScreenContainer>
 
       <BottomSheet

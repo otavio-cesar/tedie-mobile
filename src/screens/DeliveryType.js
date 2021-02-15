@@ -15,31 +15,30 @@ import { CheckoutContext } from '../contexts/CheckoutContext'
 import { CartContext } from '../contexts/CartContext'
 import { buscaHorarios } from '../services/market'
 
-const DeliveryType = ({ navigation }) => {
+const DeliveryType = ({ navigation, route }) => {
   const [selectedType, setSelectedType] = useState(0)
   const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
   const { cartState, cartDispatch } = useContext(CartContext);
   const [horarios, setHorarios] = useState([])
+  const { IdEmpresa } = route.params
 
   useEffect(() => {
-    const market = cartState.markets[checkoutState.selectedMarketIndex]
-    buscaHorariosEstabelecimento(market.IdEmpresa)
-  }, [checkoutState.selectedMarketIndex])
+    buscaHorariosEstabelecimento()
+  },[])
 
   useEffect(() => {
     if (horarios.length > 0) {
       setSelectedIndexSaved()
     }
-  }, [horarios, checkoutState.selectedMarketIndex])
+  }, [horarios])
 
   async function setSelectedIndexSaved() {
-    const market = cartState.markets[checkoutState.selectedMarketIndex]
-    const horarioEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]
+    const horarioEntrega = checkoutState.horarioEntregaPorEstabelecimento[IdEmpresa]
     setSelectedType(horarioEntrega)
   }
 
-  async function buscaHorariosEstabelecimento(idEmpresa) {
-    const horarios = await buscaHorarios(idEmpresa)
+  async function buscaHorariosEstabelecimento() {
+    const horarios = await buscaHorarios(IdEmpresa)
     setHorarios(horarios)
   }
 
@@ -47,9 +46,8 @@ const DeliveryType = ({ navigation }) => {
     const horarioEntrega = `${horario.TIPOENTREGA}-${horario.horario}-${horario.TAXA}-${horario.identrega}-${horario.horacod}`
     setSelectedType(horarioEntrega)
 
-    const market = cartState.markets[checkoutState.selectedMarketIndex]
     let he = { ...checkoutState.horarioEntregaPorEstabelecimento }
-    he[`${market.IdEmpresa}`] = horarioEntrega
+    he[`${IdEmpresa}`] = horarioEntrega
     const action = { type: "setHorarioEntregaPorEstabelecimento", payload: { horarioEntregaPorEstabelecimento: he } }
     checkoutDispatch(action);
 

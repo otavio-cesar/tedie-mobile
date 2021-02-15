@@ -12,7 +12,7 @@ import theme from '../theme'
 const Account = ({ navigation }) => {
   return (
     <React.Fragment>
-      <MainNavbar />
+      <MainNavbar navigation={navigation}  />
 
       <ScreenContainer>
         {/* Profile data */}

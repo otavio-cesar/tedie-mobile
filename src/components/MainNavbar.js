@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import { StyleSheet, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
@@ -8,14 +8,15 @@ import Navbar from './Navbar'
 // theme
 import theme from '../theme'
 
-const MainNavbar = () => {
+const MainNavbar = ({ navigation }) => {
+
   return (
     <Navbar
       left={
         <React.Fragment>
-          <Avatar 
-            size={35} 
-            color={theme.palette.secondary} 
+          <Avatar
+            size={35}
+            color={theme.palette.secondary}
           />
           <Typography size="medium" color="#fff">
             TEDIE
@@ -25,16 +26,18 @@ const MainNavbar = () => {
 
       right={
         <React.Fragment>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.navbarButton}
-            hitSlop={theme.hitSlop}  
+            hitSlop={theme.hitSlop}
+            onPress={() => navigation.navigate('Localizações2')}
           >
             <Ionicons name="md-pin" size={30} color="#fff" />
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.navbarButton}
             hitSlop={theme.hitSlop}
+            onPress={() => navigation.navigate('Produtos2')}
           >
             <Ionicons name="md-search" size={30} color="#fff" />
           </TouchableOpacity>

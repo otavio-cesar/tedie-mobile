@@ -10,6 +10,7 @@ import {
 import { AppContext, appReducer, initialState } from './src/contexts/AppContext'
 import { CartContext, appCartReducer, cartInitialState } from './src/contexts/CartContext'
 import { CheckoutContext, appCheckoutReducer, checkoutInitialState } from './src/contexts/CheckoutContext'
+import { getMarketsListByIds } from './src/services/market'
 
 export default function App() {
   const [state, dispatch] = useReducer(appReducer, initialState)
@@ -42,18 +43,50 @@ export default function App() {
     dispatch(action);
   }
 
+  async function loadMarkets() {
+    carregaCarrinho()
+  }
+
   async function loadSessao() {
     const sessao = JSON.parse(await AsyncStorage.getItem('sessao'));
     const action = { type: "createSessao", payload: { sessao } };
     dispatch(action);
   }
 
+  
+  function getSelectedMarkets() {
+    return state.carrinho
+      .filter((c, i, v) => v.findIndex((f) => f.product.IdEmpresa == c.product.IdEmpresa) == i)
+      .map(c => c.product.IdEmpresa)
+  }
+
+  async function carregaCarrinho() {
+    const selectedMarkets = getSelectedMarkets()
+    getMarketsListByIds(selectedMarkets)
+      .then(markets => {
+        const action = { type: "setMarkets", payload: { markets: markets } }
+        cartDispatch(action);
+      })
+  }
+
   useEffect(() => {
-    loadToken();
     loadSessao();
     loadLocalization()
     loadCarrinho()
   }, [])
+
+  async function carregaCarrinho() {
+    const selectedMarkets = getSelectedMarkets()
+    getMarketsListByIds(selectedMarkets)
+      .then(markets => {
+        const action = { type: "setMarkets", payload: { markets: markets } }
+        cartDispatch(action);
+      })
+  }
+
+  useEffect(() => {
+    loadMarkets()
+  }, [state.carrinho])
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

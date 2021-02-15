@@ -25,9 +25,8 @@ const Home = ({ navigation }) => {
   const [deliveryType, setDeliveryType] = useState('all')
   const [loadingMarkets, setLoadingMarkets] = useState(false)
   const [markets, setMarkets] = useState([]);
-  const [localizacao, setLocalizacao] = useState("");
   const [products, setProducts] = useState([]);
-  const [isLocalAltered, setLocalAltered] = useState([]);
+  const toastRef = useRef();
 
   const loadMarkets = async () => {
     setLoadingMarkets(true)
@@ -59,7 +58,7 @@ const Home = ({ navigation }) => {
     (async () => {
       let { status } = await Location.requestPermissionsAsync();
       if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
+        toastRef.current?.show('Permissão para acessar localização foi negada', 3000)
         return;
       }
       let location = await Location.getCurrentPositionAsync({});
@@ -88,13 +87,13 @@ const Home = ({ navigation }) => {
     <React.Fragment>
 
       <StatusBar backgroundColor={theme.palette.primary} />
-      <MainNavbar />
+      <MainNavbar navigation={navigation} />
 
       <CartFab />
 
       <ScreenContainer>
         <ContentContainer>
-          <TouchableWithoutFeedback onPress={() => navigation.navigate('Localizações', { setLocalHome: setLocalAltered })}>
+          <TouchableWithoutFeedback onPress={() => navigation.navigate('Localizações2')}>
             <View style={styles.locationContainer}>
               <Ionicons name="md-locate" size={25} color={theme.palette.primary} />
 
@@ -102,7 +101,7 @@ const Home = ({ navigation }) => {
                 <Typography size="small" color="#000">
                   {state.address
                     ?
-                    (state.address.CEP ? state.address.Beautify : state.address.results ? state.address.results[0].formatted_address : "")
+                    (state.address?.results ? state.address.results[0].formatted_address : state.address.Beautify)
                     : ""
                   }
                 </Typography>

@@ -1,21 +1,41 @@
-import React, { useState, useRef } from 'react'
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  TouchableWithoutFeedback, 
-  Image, 
-  Animated 
+import React, { useState, useRef, useContext, useEffect } from 'react'
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableWithoutFeedback,
+  Image,
+  Animated
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 
 // components
 import theme from '../theme'
+import { CartContext } from '../contexts/CartContext'
+import { CheckoutContext } from '../contexts/CheckoutContext'
+import { AppContext } from '../contexts/AppContext'
 
 const CartFab = () => {
+  const { cartState, cartDispatch } = useContext(CartContext);
+  const { state, dispatch } = useContext(AppContext);
+  const [lista, setLista] = useState([])
   const [isOpen, setOpen] = useState(false)
-
   const openFabAnimation = useRef(new Animated.Value(0)).current
+
+  async function atualiza() {
+    let l = cartState.markets.map(market => {
+      const qtd = state.carrinho.filter(c => c.product.IdEmpresa == market.IdEmpresa).map(c => c.quantity).reduce((a, v) => { return a + v }, 0)
+      const obj = { market, qtd: qtd }
+      return obj
+    })
+
+    l = l.filter(v => v.qtd > 0)
+    setLista(l)
+  }
+
+  useEffect(() => {
+    atualiza()
+  }, [cartState.markets])
 
   const openFab = () => {
     Animated.timing(openFabAnimation, {
@@ -45,43 +65,38 @@ const CartFab = () => {
       )} */}
 
       <View style={styles.miniFabContainer}>
-        <Animated.View style={[
-          styles.miniFab,
-          { transform: [
-            { scaleX: openFabAnimation },
-            { scaleY: openFabAnimation }
-          ]}
-        ]}>
-          <Animated.Image
-            style={[
-              styles.miniFabImage,
-              { transform: [
-                { scaleX: openFabAnimation },
-                { scaleY: openFabAnimation }
-              ]}
-            ]}
-            source={{
-              uri: 'https://reactnative.dev/img/tiny_logo.png',
-            }}  
-            resizeMode="contain"
-          />
-          <View style={styles.quantityContainer}>
-            <Text style={styles.quantityText}>10</Text>
-          </View>
-        </Animated.View>
-
-        <Animated.View style={[
-          styles.miniFab,
-          { transform: [
-            { scaleX: openFabAnimation },
-            { scaleY: openFabAnimation }
-          ]}
-        ]}>
-          <Ionicons name="md-add" size={25} color={theme.palette.dark} />
-          <View style={styles.quantityContainer}>
-            <Text style={styles.quantityText}>10</Text>
-          </View>
-        </Animated.View>
+        {lista.map(obj => {
+          return (
+            <Animated.View style={[
+              styles.miniFab,
+              {
+                transform: [
+                  { scaleX: openFabAnimation },
+                  { scaleY: openFabAnimation }
+                ]
+              }
+            ]}>
+              <Animated.Image
+                style={[
+                  styles.miniFabImage,
+                  {
+                    transform: [
+                      { scaleX: 1 },
+                      { scaleY: 1 }
+                    ]
+                  }
+                ]}
+                source={{
+                  uri: `${obj.market.Logo}`,
+                }}
+                resizeMode="contain"
+              />
+              <View style={styles.quantityContainer}>
+                <Text style={styles.quantityText}>{obj.qtd}</Text>
+              </View>
+            </Animated.View>
+          )
+        })}
       </View>
 
       <TouchableWithoutFeedback onPress={() => handleOpenFab()}>
@@ -93,11 +108,13 @@ const CartFab = () => {
             <Ionicons name="md-close" size={25} color={theme.palette.dark} />
           )}
           <View style={styles.quantityContainer}>
-            <Text style={styles.quantityText}>10</Text>
+            <Text style={styles.quantityText}>
+              {lista.reduce((a, v) => { return a + v.qtd }, 0)}
+            </Text>
           </View>
         </View>
       </TouchableWithoutFeedback>
-    </React.Fragment> 
+    </React.Fragment>
   )
 }
 
@@ -135,7 +152,7 @@ const styles = StyleSheet.create({
     color: '#fff'
   },
   miniFabContainer: {
-    width: 70, 
+    width: 70,
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
@@ -163,7 +180,7 @@ const styles = StyleSheet.create({
   miniFabImage: {
     height: 60,
     width: 60,
-    borderRadius: 100
+     borderRadius: 100 
   },
   fabBackdrop: {
     width: '100%',

@@ -6,7 +6,7 @@ import Box from '../components/Box'
 import Button from '../components/Button'
 import theme from '../theme'
 import Typography from '../components/Typography'
-import { login } from '../services/clients'
+import { login, postCliente } from '../services/clients'
 import { AppContext } from '../contexts/AppContext'
 import Toast from 'react-native-easy-toast'
 
@@ -14,6 +14,11 @@ const Login = ({ navigation }) => {
   const [activePage, setActivePage] = useState('login')
   const [usuario, setUsuario] = useState('')
   const [senha, setSenha] = useState('')
+  const [sobrenome, setSobrenome] = useState('')
+  const [nome, setNome] = useState('')
+  const [email, setEmail] = useState('')
+  const [cpf, setCpf] = useState('')
+  const [nascimento, setNascimento] = useState('')
   const toastRef = useRef();
   const { state, dispatch } = useContext(AppContext);
 
@@ -32,6 +37,25 @@ const Login = ({ navigation }) => {
     if (state.sessao)
       navigation.navigate('Tabs')
   })
+
+  async function cadastrarUsuario() {
+    const cliente = {
+      NomeCliente: `${nome} ${sobrenome}`,
+      datanasc: nascimento,
+      Email: email,
+      CPF: cpf,
+      Senha: senha,
+      Apelido: nome
+    }
+
+    if (await postCliente(cliente)) {
+      toastRef.current?.show('Cadastro realizado. Faça login.', 3000)
+      setActivePage('login')
+      setSenha('')
+    } else {
+      toastRef.current?.show('Ocorreu um erro inesperado.', 3000)
+    }
+  }
 
   return (
     <React.Fragment>
@@ -106,12 +130,16 @@ const Login = ({ navigation }) => {
             <TextField
               width="50%"
               label="Nome"
+              value={nome}
+              setValue={setNome}
               labelColor="#fff"
               borderColor={theme.palette.secondary}
             />
             <TextField
               width="50%"
               label="Sobrenome"
+              value={sobrenome}
+              setValue={setSobrenome}
               labelColor="#fff"
               borderColor={theme.palette.secondary}
             />
@@ -120,6 +148,8 @@ const Login = ({ navigation }) => {
           <TextField
             width="100%"
             label="E-mail"
+            value={email}
+            setValue={setEmail}
             labelColor="#fff"
             borderColor={theme.palette.secondary}
           />
@@ -127,6 +157,8 @@ const Login = ({ navigation }) => {
           <TextField
             width="100%"
             label="CPF"
+            value={cpf}
+            setValue={setCpf}
             labelColor="#fff"
             borderColor={theme.palette.secondary}
           />
@@ -134,6 +166,9 @@ const Login = ({ navigation }) => {
           <TextField
             width="100%"
             label="Data de Nascimento"
+            value={nascimento}
+            date
+            setValue={setNascimento}
             labelColor="#fff"
             borderColor={theme.palette.secondary}
           />
@@ -141,16 +176,19 @@ const Login = ({ navigation }) => {
           <TextField
             width="100%"
             label="Senha"
+            value={senha}
+            setValue={setSenha}
             labelColor="#fff"
+            password
             borderColor={theme.palette.secondary}
           />
 
-          <TextField
+          {/* <TextField
             width="100%"
             label="Confirme a senha"
             labelColor="#fff"
             borderColor={theme.palette.secondary}
-          />
+          /> */}
 
           <Box direction="row" justify="center" alignItems="center">
             <Button
@@ -158,7 +196,7 @@ const Login = ({ navigation }) => {
               color={theme.palette.primary}
               width="80%"
               text="Cadastrar"
-              onPress={() => navigation.navigate('Tabs')}
+              onPress={() => cadastrarUsuario()}
             />
           </Box>
 

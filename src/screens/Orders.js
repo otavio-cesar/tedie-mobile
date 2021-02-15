@@ -60,6 +60,7 @@ const Orders = ({ navigation }) => {
   }, [setOrderLoader, setOrders, getOrders])
 
   useEffect(() => {
+    debugger
     loadOrders()
   }, [])
 
@@ -79,22 +80,15 @@ const Orders = ({ navigation }) => {
       />
 
       <ScreenContainer>
-        {fakeOrders.map((order, index) =>
-          <OrderItem 
-            order={order}
-            onPress={() => navigation.navigate('Pedido', { order: order })}
-            key={index}
-          />
-        )}
-        {!ordersLoader && orders.length > 0 
+        {!ordersLoader && orders.length > 0
           && orders.map((order, index) => (
-            <OrderItem 
+            <OrderItem
               order={order}
-              onPress={() => navigation.navigate('Pedido')}
+              onPress={() => navigation.navigate('Pedido', { order: order })}
               key={index}
             />
-          )
-        )}
+          ))
+        }
       </ScreenContainer>
     </React.Fragment>
   )

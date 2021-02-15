@@ -22,8 +22,6 @@ const Locations = ({ route, navigation }) => {
   const [locations, setLocations] = useState([])
   const toastRef = useRef();
 
-  // const { setLocalHome } = route.params;
-
   const loadLocations = useCallback(async () => {
     setLocationsLoader(true)
 
@@ -40,9 +38,10 @@ const Locations = ({ route, navigation }) => {
   async function setLocalization(local) {
     if (local == 'gps') {
       (async () => {
+        toastRef.current?.show('Carregando localização...', 2000)
         let { status } = await Location.requestPermissionsAsync();
         if (status !== 'granted') {
-          setErrorMsg('Permission to access location was denied');
+          toastRef.current?.show('Permissão para acessar localização foi negada', 3000)
           return;
         }
 
@@ -53,7 +52,7 @@ const Locations = ({ route, navigation }) => {
         const action = { type: "createAddress", payload: address };
         dispatch(action);
 
-        toastRef.current?.show('Endereço selecionado', 2000)
+        navigation.pop()
       })()
     } else {
       await AsyncStorage.setItem('Localization', JSON.stringify(local));
@@ -61,7 +60,7 @@ const Locations = ({ route, navigation }) => {
       const action = { type: "createAddress", payload: local };
       dispatch(action);
 
-      toastRef.current?.show('Endereço selecionado', 2000)
+      navigation.pop()
     }
   }
 

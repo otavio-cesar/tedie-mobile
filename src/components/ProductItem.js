@@ -9,6 +9,7 @@ import theme from '../theme'
 import { AppContext } from '../contexts/AppContext'
 import { useQuantity } from '../hooks/useQuantity'
 import { CartContext } from '../contexts/CartContext'
+import { getMarketsListByIds } from '../services/market'
 
 const ProductItem = ({ product, skeleton }) => {
   const { state, dispatch } = useContext(AppContext);
@@ -26,6 +27,8 @@ const ProductItem = ({ product, skeleton }) => {
 
     action = { type: "setSomaParcial", payload: { somaParcial: [] } }
     cartDispatch(action)
+
+    carregaCarrinho() 
 
     action = { type: "setTotalComprasPorEstabelecimento", payload: { totalComprasPorEstabelecimento: [] } }
     cartDispatch(action)
@@ -47,8 +50,25 @@ const ProductItem = ({ product, skeleton }) => {
     action = { type: "setSomaParcial", payload: { somaParcial: [] } }
     cartDispatch(action)
 
+    carregaCarrinho() 
+
     action = { type: "setTotalComprasPorEstabelecimento", payload: { totalComprasPorEstabelecimento: [] } }
     cartDispatch(action)
+  }
+
+  function getSelectedMarkets() {
+    return state.carrinho
+      .filter((c, i, v) => v.findIndex((f) => f.product.IdEmpresa == c.product.IdEmpresa) == i)
+      .map(c => c.product.IdEmpresa)
+  }
+
+  async function carregaCarrinho() {
+    const selectedMarkets = getSelectedMarkets()
+    getMarketsListByIds(selectedMarkets)
+      .then(markets => {
+        const action = { type: "setMarkets", payload: { markets: markets } }
+        cartDispatch(action);
+      })
   }
 
   return (

@@ -14,20 +14,8 @@ import CategoryItem from '../components/CategoryItem'
 import { getProducts } from '../services/market'
 
 const Market = ({ navigation, route }) => {
-
-  const categories = [
-    { name: 'Açougue' },
-    { name: 'Cerveja' },
-    { name: 'Bebidas' },
-    { name: 'Frutas' },
-    { name: 'Verduras' },
-    { name: 'Limpeza' },
-    { name: 'Higiene' }
-  ]
-
   const [loadingProducts, setLoadingProducts] = useState(false)
   const [marketProducts, setMarketProducts] = useState([])
-
   const { market } = route.params
 
   const loadMarketProducts = useCallback(async () => {
@@ -55,6 +43,26 @@ const Market = ({ navigation, route }) => {
           <Typography size="small" color="#fff">
             Mercado
           </Typography>
+        }
+        right={
+          <React.Fragment>
+            <TouchableOpacity
+              style={styles.navbarButton}
+              hitSlop={theme.hitSlop}
+              onPress={() => navigation.navigate('Localizações2')}
+            >
+              <Ionicons name="md-pin" size={30} color="#fff" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navbarButton}
+              hitSlop={theme.hitSlop}
+              onPress={() => navigation.navigate('Categorias', { screen: 'Produtos' })
+              }
+            >
+              <Ionicons name="md-search" size={30} color="#fff" />
+            </TouchableOpacity>
+          </React.Fragment>
         }
       />
 
@@ -130,6 +138,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     flexShrink: 1
+  },
+  navbarButton: {
+    marginHorizontal: 8
   }
 })
 

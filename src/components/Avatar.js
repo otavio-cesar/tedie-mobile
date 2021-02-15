@@ -11,12 +11,15 @@ const Avatar = ({ image, size, color, styles, selected }) => {
         <Image   
           style={[
             customStyles.avatar, 
-            { width: size, height: size }, 
+            { width: size, height: size, backgroundColor: color }, 
             styles,
             selected ? customStyles.selected : null
           ]}
+          source={{
+            uri: image,
+          }}  
           resizeMode="contain"
-          source={{ image }}
+          // source={{ image }}
         />
       )}
 

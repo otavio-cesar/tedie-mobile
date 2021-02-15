@@ -4,7 +4,7 @@ export const login = async (usuario, senha) => {
     const response = await api().post(
         `${urlApi}clientes/autenticaComToken?login=${usuario}&senha=${senha}`,
     ).catch(e => {
-        console.log("asd")
+        console.log(e.message)
     });
 
     if (response)
@@ -14,4 +14,19 @@ export const login = async (usuario, senha) => {
         }
     else
         return {}
+}
+
+
+export const postCliente = async (cliente) => {
+    const response = await api().post(
+        `${urlApi}clientes/`,
+        cliente
+    ).catch(e => {
+        console.log(e.message)
+    });
+
+    if (response.status == 201)
+        return true
+    else
+        return false
 }

@@ -1,9 +1,13 @@
+import AsyncStorage from '@react-native-community/async-storage'
 import Axios from 'axios'
 import { urlApi } from './axios'
 
 export const getOrders = async () => {
+  const sessao = JSON.parse(await AsyncStorage.getItem("sessao"))
+  const IdCliente = sessao.IdCliente
+  
   const response = await Axios.get(
-    'http://tedie.azurewebsites.net/api/pedidos'
+    `${urlApi}pedidos/usuario/${IdCliente}`
   )
 
   return response.data

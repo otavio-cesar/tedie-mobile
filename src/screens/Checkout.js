@@ -83,7 +83,7 @@ const Checkout = ({ navigation, route }) => {
       setSelectedPayment(selected.opcao)
   }
 
-  function selecionaOpcaoCartao(opcao) {
+  function selecionaOpcaoPagamento(opcao) {
     if ('credit') {
       const market = cartState.markets[checkoutState.selectedMarketIndex]
       let he = { ...checkoutState.cartaoPorEstabelecimento }
@@ -98,27 +98,30 @@ const Checkout = ({ navigation, route }) => {
 
   async function fazerPedido() {
     const idCliente = state.sessao.IdCliente
-    
+
     cartState.markets.forEach(market => {
       const endereco = checkoutState.enderecoEntregaPorEstabelecimento[0]
-      const IdCartao = checkoutState.cartaoPorEstabelecimento[market.IdEmpresa].IdCartao
+      let IdCartao = 0
       let Valor = cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`] +
         (checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ? (+checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]) : 0)
-      let IdCupom = market.IdEmpresa == cupom.IdEmpresa ? cupom.IdCupom : 0
-      let Desconto = market.IdEmpresa == cupom.Valor ? cupom.IdCupom : 0
+      let IdCupom = market.IdEmpresa == cupom?.IdEmpresa ? cupom.IdCupom : 0
+      let Desconto = market.IdEmpresa == cupom?.Valor ? cupom.IdCupom : 0
       // let TipoEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[0]
       let IdTipoEntrega = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[3]
       let Taxa = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]
       // let Horario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[1]
       let IdHorario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[4]
       let CEP = endereco.CEP
-      let OpcaoPagamento = checkoutState.cartaoPorEstabelecimento[market.IdEmpresa].opcao
-      
+      let OpcaoPagamento = checkoutState.cartaoPorEstabelecimento[0].opcao
+
+      if (OpcaoPagamento == 'credit')
+        IdCartao = checkoutState.cartaoPorEstabelecimento[0].IdCartao
+
       let pedido = {
         IdEmpresa: market.IdEmpresa,
         IdCliente: idCliente,
         NumeroPedido: (Math.random() * 1000000).toFixed(0),
-        Data: new Date().toLocaleDateString(),
+        Data: new Date(),
         Valor,
         IdCupom,
         // TipoEntrega,
@@ -134,11 +137,12 @@ const Checkout = ({ navigation, route }) => {
         Observacao: "",
         Desconto
       }
-      debugger
+      
       postPedido(pedido)
-
-      // postPagamento(pedido, market.IdEmpresa)
+      
     });
+
+     // postPagamento(pedido, market.IdEmpresa)
   }
 
   const fazPagamento = (cartao, pedido) => {
@@ -316,7 +320,7 @@ const Checkout = ({ navigation, route }) => {
 
             <View style={styles.paymentMethodContainer}>
               <View style={styles.paymentContainer}>
-                <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => selecionaOpcaoCartao("credit")}>
+                <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => selecionaOpcaoPagamento("credit")}>
                   <RadioButton selected={selectedPayment === "credit"} />
                   <View>
                     <Typography size="small" color={theme.palette.dark}>
@@ -339,11 +343,20 @@ const Checkout = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity onPress={() => selecionaOpcaoCartao("picpay")}>
+            <TouchableOpacity onPress={() => selecionaOpcaoPagamento("picpay")}>
               <View style={styles.paymentMethodContainer}>
                 <RadioButton selected={selectedPayment === "picpay"} />
                 <Typography size="small" color={theme.palette.dark}>
                   Picpay
+                </Typography>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => selecionaOpcaoPagamento("entrega-retirada")}>
+              <View style={styles.paymentMethodContainer}>
+                <RadioButton selected={selectedPayment === "entrega-retirada"} />
+                <Typography size="small" color={theme.palette.dark}>
+                  Pagar na entrega ou retirada
                 </Typography>
               </View>
             </TouchableOpacity>

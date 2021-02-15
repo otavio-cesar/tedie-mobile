@@ -40,9 +40,8 @@ const LocationsCheckout = ({ route, navigation }) => {
   }, [loadLocations])
 
   async function setLocalization(local) {
-    const market = cartState.markets[checkoutState.selectedMarketIndex]
     let ee = { ...checkoutState.enderecoEntregaPorEstabelecimento }
-    ee[`${market.IdEmpresa}`] = local
+    ee[`${0}`] = local
     const action = { type: "setEnderecoEntregaPorEstabelecimento", payload: { enderecoEntregaPorEstabelecimento: ee } }
     checkoutDispatch(action);
 

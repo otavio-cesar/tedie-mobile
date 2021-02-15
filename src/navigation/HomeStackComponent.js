@@ -33,13 +33,13 @@ const HomeStackComponent = () => {
           ...TransitionPresets.ModalPresentationIOS, 
         }}  
       />
-      <HomeStack.Screen 
+      {/* <HomeStack.Screen 
         name="Localizações" 
         component={Locations} 
         options={{
           ...TransitionPresets.SlideFromRightIOS,
         }}   
-      />
+      /> */}
       <HomeStack.Screen 
         name="Localização" 
         component={Location} 
