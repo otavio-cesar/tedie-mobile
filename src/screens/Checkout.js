@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
   StyleSheet,
   View,
@@ -22,8 +22,11 @@ import { CheckoutContext } from '../contexts/CheckoutContext'
 import { AppContext } from '../contexts/AppContext'
 import { postPedido } from '../services/products'
 import { geraCheckoutAPI, fazPagamentoJuno } from '../utils/boletofacil'
+import Toast, { DURATION } from 'react-native-easy-toast'
+import { getMarketsListByIds } from '../services/market'
 
 const Checkout = ({ navigation, route }) => {
+  const toastRef = useRef();
   const [selectedPayment, setSelectedPayment] = useState("credit")
   const { cartState, cartDispatch } = useContext(CartContext);
   const { checkoutState, checkoutDispatch } = useContext(CheckoutContext);
@@ -34,30 +37,19 @@ const Checkout = ({ navigation, route }) => {
   const [cupom, setCupom] = useState("")
 
   useEffect(() => {
-    console.log(cartState.markets)
-    console.log(checkoutState.selectedMarketIndex)
     changeAddress()
-    //changeHorario()
     changeCartao()
   }, [checkoutState.selectedMarketIndex])
 
-  // useEffect(() => {
-  //   console.log(checkoutState.horarioEntregaPorEstabelecimento)
-  //   changeHorario()
-  // }, [checkoutState.horarioEntregaPorEstabelecimento])
-
   useEffect(() => {
-    console.log(checkoutState.enderecoEntregaPorEstabelecimento)
     changeAddress()
   }, [checkoutState.enderecoEntregaPorEstabelecimento])
 
   useEffect(() => {
-    console.log(checkoutState.cupom)
     setCupom(checkoutState.cupom)
   }, [checkoutState.cupom])
 
   useEffect(() => {
-    console.log(checkoutState.cartaoPorEstabelecimento)
     changeCartao()
   }, [checkoutState.cartaoPorEstabelecimento])
 
@@ -76,8 +68,7 @@ const Checkout = ({ navigation, route }) => {
 
   async function changeCartao() {
     if (checkoutState.cartaoPorEstabelecimento.length == 0) return
-    const market = cartState.markets[checkoutState.selectedMarketIndex]
-    const selected = checkoutState.cartaoPorEstabelecimento[market.IdEmpresa]
+    const selected = checkoutState.cartaoPorEstabelecimento[0]
     setShowCartao(selected)
     if (selected)
       setSelectedPayment(selected.opcao)
@@ -85,11 +76,10 @@ const Checkout = ({ navigation, route }) => {
 
   function selecionaOpcaoPagamento(opcao) {
     if ('credit') {
-      const market = cartState.markets[checkoutState.selectedMarketIndex]
       let he = { ...checkoutState.cartaoPorEstabelecimento }
-      const cartao = he[`${market.IdEmpresa}`]
+      const cartao = he[`${0}`]
       cartao.opcao = opcao
-      he[`${market.IdEmpresa}`] = cartao
+      he[`${0}`] = cartao
       const action = { type: "setCartaoPorEstabelecimento", payload: { cartaoPorEstabelecimento: he } }
       checkoutDispatch(action);
       setSelectedPayment(opcao)
@@ -97,10 +87,17 @@ const Checkout = ({ navigation, route }) => {
   }
 
   async function fazerPedido() {
+    const codigo_transacao = (Math.random() * 1000000).toFixed(0)
     const idCliente = state.sessao.IdCliente
+    let totalCompra = 0
+    const endereco = checkoutState.enderecoEntregaPorEstabelecimento[0]
+
+    if (!endereco) {
+      toastRef.current?.show('Selecione o endereço', 2000)
+      return
+    }
 
     cartState.markets.forEach(market => {
-      const endereco = checkoutState.enderecoEntregaPorEstabelecimento[0]
       let IdCartao = 0
       let Valor = cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`] +
         (checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]?.split('-').length > 0 ? (+checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]) : 0)
@@ -111,13 +108,14 @@ const Checkout = ({ navigation, route }) => {
       let Taxa = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[2]
       // let Horario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[1]
       let IdHorario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[4]
-      let CEP = endereco.CEP
+      let CEP = endereco?.CEP ?? ""
       let OpcaoPagamento = checkoutState.cartaoPorEstabelecimento[0].opcao
 
       if (OpcaoPagamento == 'credit')
         IdCartao = checkoutState.cartaoPorEstabelecimento[0].IdCartao
 
       let pedido = {
+        codigo_transacao: codigo_transacao,
         IdEmpresa: market.IdEmpresa,
         IdCliente: idCliente,
         NumeroPedido: (Math.random() * 1000000).toFixed(0),
@@ -137,23 +135,60 @@ const Checkout = ({ navigation, route }) => {
         Observacao: "",
         Desconto
       }
-      
+      totalCompra += Valor
       postPedido(pedido)
-      
     });
-
-     // postPagamento(pedido, market.IdEmpresa)
+    postPagamento(codigo_transacao, totalCompra)
   }
 
-  const fazPagamento = (cartao, pedido) => {
-    let checkout = geraCheckoutAPI()
+  function getSelectedMarkets() {
+    return state.carrinho
+      .filter((c, i, v) => v.findIndex((f) => f.product.IdEmpresa == c.product.IdEmpresa) == i)
+      .map(c => c.product.IdEmpresa)
+  }
 
+  async function carregaCarrinho() {
+    const selectedMarkets = getSelectedMarkets()
+    getMarketsListByIds(selectedMarkets)
+      .then(markets => {
+        const action = { type: "setMarkets", payload: { markets: markets } }
+        cartDispatch(action);
+      })
+  }
+
+  async function pedidoConfirmado() {
+    const limpaCarrinho = () => {
+      let action = { type: 'createCarrinho', payload: new Array() }
+      dispatch(action)
+      action = { type: "setTotalCompras", payload: { totalCompras: 0 } }
+      cartDispatch(action)
+      action = { type: "setSomaParcial", payload: { somaParcial: [] } }
+      cartDispatch(action)
+      action = { type: "setHorarioEntregaPorEstabelecimento", payload: { horarioEntregaPorEstabelecimento: [] } }
+      cartDispatch(action)
+      action = { type: "setEnderecoEntregaPorEstabelecimento", payload: { enderecoEntregaPorEstabelecimento: [] } }
+      cartDispatch(action)
+      action = { type: "setTotalComprasPorEstabelecimento", payload: { totalComprasPorEstabelecimento: [] } }
+      cartDispatch(action)
+      action = { type: "setCartaoPorEstabelecimento", payload: { cartaoPorEstabelecimento: [] } }
+      cartDispatch(action)
+    }
+    limpaCarrinho()
+    carregaCarrinho()
+  }
+
+  const fazPagamento = (cartao, codigo_transacao, valor) => {
+    return pedidoConfirmado()
+    const paymentTypes = 'CREDIT_CARD'
+    let checkout = geraCheckoutAPI()
     checkout.getCardHash(cartao, function (cardHash) {
-      console.log('cardHash')
+      console.log(cardHash)
       /* Sucesso - A variável cardHash conterá o hash do cartão de crédito */
-      fazPagamentoJuno(cardHash, pedido.NumeroPedido, pedido.Valor, "nomepessoas", "cpf")
+      const data = fazPagamentoJuno(cardHash, codigo_transacao, 0.52, cartao.holderName, "10934429642", "Timóteo", "MG", "35182362", paymentTypes, "Rua Equador", "279", "otaviool@hotmail.com")
+      if (data.charges[0].payments[0].status == 'CONFIRMED')
+        pedidoConfirmado()
     }, function (error) {
-      console.log('error')
+      console.log(error.message)
       /* Erro - A variável error conterá o erro ocorrido ao obter o hash */
     });
   }
@@ -162,9 +197,8 @@ const Checkout = ({ navigation, route }) => {
     console.log(error)
   }
 
-  async function postPagamento(pedido, IdEmpresa) {
-    const cartao = checkoutState.cartaoPorEstabelecimento[IdEmpresa]
-
+  async function postPagamento(codigo_transacao, valor) {
+    const cartao = checkoutState.cartaoPorEstabelecimento[0]
     var cardData = {
       cardNumber: cartao.Numero.split(' ').join(""),
       holderName: cartao.Titular,
@@ -172,12 +206,17 @@ const Checkout = ({ navigation, route }) => {
       expirationMonth: cartao.Validade.split('/')[0],
       expirationYear: cartao.Validade.split('/')[1]
     };
-
-    fazPagamento(cardData, pedido)
+    fazPagamento(cardData, codigo_transacao, valor)
   }
 
   return (
     <React.Fragment>
+
+      <Toast ref={toastRef}
+        style={{ backgroundColor: 'black' }}
+        opacity={0.8}
+        textStyle={{ color: 'white' }} />
+
       <Navbar
         left={
           <TouchableOpacity hitSlop={theme.hitSlop} onPress={() => navigation.pop()}>
@@ -192,7 +231,6 @@ const Checkout = ({ navigation, route }) => {
       />
 
       <ScreenContainer>
-
 
         {/* Delivery Location */}
         <ContentContainer>
@@ -234,7 +272,7 @@ const Checkout = ({ navigation, route }) => {
                     Total em produtos
               </Typography>
                   <Typography size="small" color={theme.palette.light}>
-                    R$ {cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`].toFixed(2).replace('.', ',')}
+                    R$ {cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`]?.toFixed(2).replace('.', ',') ?? "0,00"}
                   </Typography>
                 </View>
 
@@ -388,7 +426,7 @@ const Checkout = ({ navigation, route }) => {
           color="#fff"
           width="100%"
           text="Fazer pedido"
-          onPress={() => fazerPedido()}
+          onPress={(e) => { e.preventDefault();; fazerPedido() }}
         />
       </ScreenContainer>
     </React.Fragment >
@@ -418,7 +456,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'flex-start',
-    textShadow: '0 0 black'
+    textShadowColor: 'black',
+    elevation: 2,
   },
   priceContainer: {
     width: '100%',

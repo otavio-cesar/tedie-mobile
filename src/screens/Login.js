@@ -12,8 +12,8 @@ import Toast from 'react-native-easy-toast'
 
 const Login = ({ navigation }) => {
   const [activePage, setActivePage] = useState('login')
-  const [usuario, setUsuario] = useState('')
-  const [senha, setSenha] = useState('')
+  const [usuario, setUsuario] = useState('otavio@gmail.com')
+  const [senha, setSenha] = useState('123123')
   const [sobrenome, setSobrenome] = useState('')
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -23,7 +23,7 @@ const Login = ({ navigation }) => {
   const { state, dispatch } = useContext(AppContext);
 
   async function handleLogin() {
-    const resp = await login(usuario, senha)
+    const resp = await login(usuario.toLowerCase(), senha.toLowerCase())
     if (resp.IdCliente && resp.token) {
       const action = { type: "createSessao", payload: { sessao: { IdCliente: resp.IdCliente, Token: resp.token } } }
       dispatch(action)
@@ -42,9 +42,9 @@ const Login = ({ navigation }) => {
     const cliente = {
       NomeCliente: `${nome} ${sobrenome}`,
       datanasc: nascimento,
-      Email: email,
+      Email: email.toLowerCase(),
       CPF: cpf,
-      Senha: senha,
+      Senha: senha.toLowerCase(),
       Apelido: nome
     }
 
@@ -92,7 +92,8 @@ const Login = ({ navigation }) => {
             label="Senha"
             labelColor="#fff"
             borderColor={theme.palette.secondary}
-            value={senha}
+             value={senha}
+            // password
             setValue={setSenha}
           />
 
@@ -138,7 +139,7 @@ const Login = ({ navigation }) => {
             <TextField
               width="50%"
               label="Sobrenome"
-              value={sobrenome}
+              // value={sobrenome}
               setValue={setSobrenome}
               labelColor="#fff"
               borderColor={theme.palette.secondary}
@@ -166,7 +167,7 @@ const Login = ({ navigation }) => {
           <TextField
             width="100%"
             label="Data de Nascimento"
-            value={nascimento}
+            // value={nascimento}
             date
             setValue={setNascimento}
             labelColor="#fff"
@@ -179,7 +180,7 @@ const Login = ({ navigation }) => {
             value={senha}
             setValue={setSenha}
             labelColor="#fff"
-            password
+            // password
             borderColor={theme.palette.secondary}
           />
 

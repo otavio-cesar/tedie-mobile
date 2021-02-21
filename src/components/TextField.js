@@ -5,7 +5,8 @@ import { Hoshi } from 'react-native-textinput-effects'
 // theme 
 import theme from '../theme'
 
-const TextField = ({ width, label, labelColor, borderColor, backgroundColor, keyboardType, returnKeyType, onEndEditing, useContainerWidth, value, setValue, date, password }) => {
+const TextField = ({ width, label, labelColor, borderColor, backgroundColor, 
+  keyboardType, returnKeyType, onEndEditing, useContainerWidth, value, setValue, date, password }) => {
   const propWidth = width ? Number.parseInt(width.replace('%', '')) : null
   const fieldWidth = width ? ((Dimensions.get('window').width * (propWidth / 100)) - 20) : null
   const windowSizeWidth = (Dimensions.get('window').width - 24)
@@ -17,8 +18,9 @@ const TextField = ({ width, label, labelColor, borderColor, backgroundColor, key
       setInputValue(maskDate(value))
       setValue(maskDate(value))
     } else {
-      setInputValue(value)
-      setValue(value)
+      let x = value
+      setInputValue(x)
+      setValue(x)
     }
   }
 
@@ -47,9 +49,10 @@ const TextField = ({ width, label, labelColor, borderColor, backgroundColor, key
       backgroundColor={backgroundColor}
       keyboardType={keyboardType}
       returnKeyType={returnKeyType}
-      onEndEditing={onEndEditing}
-      value={date ? maskDate(inputValue) : password ? inputValue.split("").reduce((a, v) => { return (a += "*") }, "") : inputValue}
-      onChange={(value) => { setInfo(value.target.value); }}
+      onEndEditing={()=>{}}
+      //value={date ? maskDate(inputValue) : password ? inputValue.split("").reduce((a, v) => { return (a += "*") }, "") : inputValue}
+      value={inputValue}
+      onChangeText={(value) => { console.log(value); setInfo(value); }}
     />
   )
 }

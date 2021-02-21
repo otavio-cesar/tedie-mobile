@@ -28,12 +28,18 @@ export const initialState = {
 }
 
 function createCarrinho(state, action) {
-    let carrinho = [...state.carrinho.filter(c => c.product.Id != action.payload.product.Id)]
-    if (action.payload.quantity > 0) {
-        carrinho.push(action.payload)
+    if (action.payload.product) {
+        let carrinho = [...state.carrinho.filter(c => c.product.Id != action.payload.product.Id)]
+        if (action.payload.quantity > 0) {
+            carrinho.push(action.payload)
+        }
+        AsyncStorage.setItem("carrinho", JSON.stringify(carrinho))
+        return { ...state, carrinho }
+    } else {
+        AsyncStorage.setItem("carrinho", JSON.stringify([]))
+        return { ...state, carrinho: [] }
     }
-    AsyncStorage.setItem("carrinho", JSON.stringify(carrinho))
-    return { ...state, carrinho }
+
 }
 
 function loadCarrinho(state, action) {

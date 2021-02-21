@@ -450,14 +450,17 @@ import Axios from "axios";
     window.DirectCheckout = DirectCheckout;
 })(window);
 
+const tokenDoFavorecido = "5D2446161015CC477D0B532F27A2A8E35E2101CD2A53157D7F86ABC70041E46E"
+
 export function geraCheckoutAPI() {
     var checkout = new DirectCheckout('7ACA5244C520E4641C6E636E11AE9F05B0747F870CD202891BAD9DD415D7DE53', false); /* Em sandbox utilizar o construtor new DirectCheckout('SEU TOKEN PUBLICO', false); */
     return checkout;
 }
 
-export const fazPagamentoJuno = async (token, descricao, valor, nomepessoa, cpf) => {
+export const fazPagamentoJuno = async (creditCardHash, descricao, valor, nomepessoa, cpf, city, billingAddressState,
+    billingAddressPostcode, paymentTypes, billingAddressStreet, billingAddressNumber, email) => {
     const response = await Axios.get(
-        `https://sandbox.boletobancario.com/boletofacil/integration/api/v1/issue-charge?token=${token}&description=${descricao}&amount=${valor}&payerName=${nomepessoa}&payerCpfCnpj=${cpf}`
+        `https://sandbox.boletobancario.com/boletofacil/integration/api/v1/issue-charge?token=${tokenDoFavorecido}&description=${descricao}&amount=${valor}&payerName=${nomepessoa}&payerCpfCnpj=${cpf}&billingAddressCity=${city}&billingAddressState=${billingAddressState}&billingAddressPostcode=${billingAddressPostcode}&creditCardHash=${creditCardHash}&paymentTypes=${paymentTypes}&billingAddressStreet=${billingAddressStreet}&billingAddressNumber=${billingAddressNumber}&payerEmail=${email}`
     ).catch(e => { console.log(e.message); })
-    return response
+    return response.data
 }

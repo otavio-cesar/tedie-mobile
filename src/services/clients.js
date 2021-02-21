@@ -6,7 +6,7 @@ export const login = async (usuario, senha) => {
     ).catch(e => {
         console.log(e.message)
     });
-
+debugger
     if (response)
         return {
             IdCliente: response.data.cliente.IdCliente,
