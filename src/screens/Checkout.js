@@ -3,7 +3,8 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  Text
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // theme
@@ -24,6 +25,7 @@ import { postPedido } from '../services/products'
 import { geraCheckoutAPI, fazPagamentoJuno } from '../utils/boletofacil'
 import Toast, { DURATION } from 'react-native-easy-toast'
 import { getMarketsListByIds } from '../services/market'
+import { Modal } from 'react-native'
 
 const Checkout = ({ navigation, route }) => {
   const toastRef = useRef();
@@ -97,6 +99,24 @@ const Checkout = ({ navigation, route }) => {
       return
     }
 
+    let horarioOk = true
+    cartState.markets.forEach(market => {
+      if (!checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa]) {
+        horarioOk = false;
+        return
+      }
+    });
+    if (!horarioOk) {
+      toastRef.current?.show('Selecione o horário de entrega', 2000)
+      return
+    }
+
+    let OpcaoPagamento = checkoutState.cartaoPorEstabelecimento
+    if(!OpcaoPagamento){
+      toastRef.current?.show('Selecione um meio de pagamento', 2000)
+      return
+    }
+
     cartState.markets.forEach(market => {
       let IdCartao = 0
       let Valor = cartState.totalComprasPorEstabelecimento[`"${market.IdEmpresa}"`] +
@@ -109,7 +129,7 @@ const Checkout = ({ navigation, route }) => {
       // let Horario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[1]
       let IdHorario = checkoutState.horarioEntregaPorEstabelecimento[market.IdEmpresa].split('-')[4]
       let CEP = endereco?.CEP ?? ""
-      let OpcaoPagamento = checkoutState.cartaoPorEstabelecimento[0].opcao
+      // let OpcaoPagamento = checkoutState.cartaoPorEstabelecimento[0].opcao
 
       if (OpcaoPagamento == 'credit')
         IdCartao = checkoutState.cartaoPorEstabelecimento[0].IdCartao
@@ -185,8 +205,9 @@ const Checkout = ({ navigation, route }) => {
       console.log(cardHash)
       /* Sucesso - A variável cardHash conterá o hash do cartão de crédito */
       const data = fazPagamentoJuno(cardHash, codigo_transacao, 0.52, cartao.holderName, "10934429642", "Timóteo", "MG", "35182362", paymentTypes, "Rua Equador", "279", "otaviool@hotmail.com")
-      if (data.charges[0].payments[0].status == 'CONFIRMED')
+      if (data.charges[0].payments[0].status == 'CONFIRMED') {
         pedidoConfirmado()
+      }
     }, function (error) {
       console.log(error.message)
       /* Erro - A variável error conterá o erro ocorrido ao obter o hash */
@@ -485,6 +506,36 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 8
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
   }
 })
 

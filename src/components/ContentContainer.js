@@ -12,7 +12,7 @@ const ContentContainer = ({ children, background }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1, // se descomentar outras telas vao bugar
     backgroundColor: '#fff',
     marginVertical: 8,
     padding: 16,

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { StyleSheet, FlatList, View, TouchableOpacity } from 'react-native'
+import { StyleSheet, FlatList, View, TouchableOpacity, TextInput } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
 import Navbar from '../components/Navbar'
@@ -11,11 +11,13 @@ import { getProductsByCEP } from '../services/products'
 import { ScreenContainer } from 'react-native-screens'
 import { AppContext } from '../contexts/AppContext'
 import ContentContainer from '../components/ContentContainer'
-import { TextInput } from 'react-native-gesture-handler'
+import { FlingGestureHandler } from 'react-native-gesture-handler'
 
 const Products = ({ navigation, route }) => {
   const { state, dispatch } = useContext(AppContext);
   const [products, setProducts] = useState([]);
+  const [productsFilter, setProductsFilter] = useState([]);
+  const [filter, setFilter] = useState("");
   const { categoriaId, onlyOffer } = route.params ?? {};
 
   const loadProducts = async () => {
@@ -24,11 +26,13 @@ const Products = ({ navigation, route }) => {
     if (local.CEP != undefined && local.CEP != "") {
       const response = await getProductsByCEP(local.CEP.replace("-", ""));
       setProducts(response);
+      setProductsFilter(response);
     } else {
       try {
         const cep = local.results[0]?.address_components.filter(ac => ac.types.filter(ty => ty == "postal_code")?.length > 0)[0]?.short_name ?? "";
         const response = await getProductsByCEP(cep.replace("-", ""));
         setProducts(response);
+        setProductsFilter(response);
       } catch (e) {
         console.log(e)
         debugger
@@ -39,7 +43,18 @@ const Products = ({ navigation, route }) => {
   useEffect(() => {
     loadProducts();
     setProducts(products.filter(p => p.IdCategoria == categoriaId))
-  }, []);
+  }, [state.address]);
+
+
+  async function filtrar(value) {
+    console.log(value)
+    if (value == "") {
+      setProductsFilter(products)
+    } else {
+      setProductsFilter(products.filter(p => p.Nome.toLowerCase().includes(value.toLowerCase())))
+    }
+    setFilter(value)
+  }
 
   return (
     <React.Fragment>
@@ -63,7 +78,7 @@ const Products = ({ navigation, route }) => {
             >
               <Ionicons name="md-pin" size={30} color="#fff" />
             </TouchableOpacity>
-  
+
             {/* <TouchableOpacity
               style={styles.navbarButton}
               hitSlop={theme.hitSlop}
@@ -78,12 +93,13 @@ const Products = ({ navigation, route }) => {
 
       <ScreenContainer style={{ padding: 16 }}>
 
-        <ContentContainer>
+        <ContentContainer >
           <View style={styles.searchContainer}>
             <Ionicons name="md-search" size={30} color={theme.palette.primary} />
             <TextInput
               style={styles.textInput}
-              value="Digite o produto"
+              value={filter}
+              onChangeText={value => filtrar(value)}
             />
           </View>
         </ContentContainer>
@@ -91,7 +107,7 @@ const Products = ({ navigation, route }) => {
         <View style={styles.container}>
           {categoriaId &&
             <FlatList
-              data={products.filter(p => p.IdCategoria == categoriaId)}
+              data={productsFilter.filter(p => p.IdCategoria == categoriaId)}
               renderItem={({ item }) => (
                 <TouchableOpacity onPress={() => navigation.navigate('Produto', { product: item })}>
                   <ProductItem product={item} />
@@ -105,7 +121,7 @@ const Products = ({ navigation, route }) => {
           }
           {!categoriaId && onlyOffer &&
             <FlatList
-              data={products}
+              data={productsFilter}
               renderItem={({ item }) => {
                 return item.hasOffer && (
                   <TouchableOpacity onPress={() => navigation.navigate('Produto', { product: item })}>
@@ -120,7 +136,7 @@ const Products = ({ navigation, route }) => {
           }
           {!categoriaId && !onlyOffer &&
             <FlatList
-              data={products}
+              data={productsFilter}
               renderItem={({ item }) => (
                 <TouchableOpacity onPress={() => navigation.navigate('Produto', { product: item })}>
                   <ProductItem product={item} />
@@ -140,7 +156,7 @@ const Products = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
@@ -153,7 +169,16 @@ const styles = StyleSheet.create({
   },
   navbarButton: {
     marginHorizontal: 8
-  }
+  },
+  textInput: {
+    width: '85%',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    marginLeft: 16,
+    backgroundColor: '#fafafa',
+    borderRadius: 16
+  },
+
 })
 
 export default Products

@@ -1,8 +1,9 @@
 import Axios from 'axios'
+import { urlApi } from './axios'
 
 export const getCoupons = async () => {
   const response = await Axios.get(
-    'http://tedie.azurewebsites.net/api/cupons'
+    `${urlApi}/cupons`
   )
 
   return response.data

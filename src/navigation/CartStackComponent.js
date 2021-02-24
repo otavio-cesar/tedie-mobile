@@ -11,6 +11,7 @@ import Locations from '../screens/Locations'
 import Document from '../screens/Document'
 import DeliveryType from '../screens/DeliveryType'
 import LocationsCheckout from '../screens/LocationsCheckout'
+import ModalConfirmed from '../screens/ModalConfirmed'
 
 const CartStack = createStackNavigator()
 
@@ -25,6 +26,7 @@ const CartStackComponent = () => {
       <CartStack.Screen name="LocalizaçõesCheckout" component={LocationsCheckout} options={{ ...TransitionPresets.SlideFromRightIOS }} />
       <CartStack.Screen name="Documento" component={Document} options={{ ...TransitionPresets.SlideFromRightIOS }} />
       <CartStack.Screen name="Entrega" component={DeliveryType} options={{ ...TransitionPresets.SlideFromRightIOS }} />
+      <CartStack.Screen name="ModalConfirmed" component={ModalConfirmed} options={{ ...TransitionPresets.SlideFromRightIOS }} />
     </CartStack.Navigator>
   )
 }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { StyleSheet, View, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 // components
@@ -8,11 +8,21 @@ import ContentContainer from '../components/ContentContainer'
 import Typography from '../components/Typography'
 // theme
 import theme from '../theme'
+import { AppContext } from '../contexts/AppContext'
 
 const Account = ({ navigation }) => {
+  const { state, dispatch } = useContext(AppContext);
+
+  async function logoff() {
+    debugger
+    const action = { type: "createSessao", payload: { sessao: undefined } };
+    dispatch(action);
+    navigation.popToTop()
+  }
+
   return (
     <React.Fragment>
-      <MainNavbar navigation={navigation}  />
+      <MainNavbar navigation={navigation} />
 
       <ScreenContainer>
         {/* Profile data */}
@@ -63,23 +73,23 @@ const Account = ({ navigation }) => {
 
         {/* Orders */}
         <TouchableOpacity onPress={() => navigation.navigate('Pedidos')}>
-          <ContentContainer>  
-              <View style={styles.optionContainer}>
-                <View style={styles.optionTextAndIcon}>
-                  <Ionicons name="ios-list-box" size={25} color={theme.palette.dark} />
+          <ContentContainer>
+            <View style={styles.optionContainer}>
+              <View style={styles.optionTextAndIcon}>
+                <Ionicons name="ios-list-box" size={25} color={theme.palette.dark} />
 
-                  <View style={styles.optionTextContainer}>
-                    <Typography size="medium" color={theme.palette.dark}>
-                      Pedidos
+                <View style={styles.optionTextContainer}>
+                  <Typography size="medium" color={theme.palette.dark}>
+                    Pedidos
                     </Typography>
-                    <Typography size="caption" color={theme.palette.light}>
-                      Meu histórico de pedidos
+                  <Typography size="caption" color={theme.palette.light}>
+                    Meu histórico de pedidos
                     </Typography>
-                  </View>
                 </View>
-
-                <Ionicons name="ios-arrow-forward" size={25} color={theme.palette.light} />
               </View>
+
+              <Ionicons name="ios-arrow-forward" size={25} color={theme.palette.light} />
+            </View>
           </ContentContainer>
         </TouchableOpacity>
         {/* End orders */}
@@ -219,6 +229,29 @@ const Account = ({ navigation }) => {
           </ContentContainer>
         </TouchableOpacity>
         {/* End Locations */}
+
+        {/* Sair */}
+        <TouchableOpacity onPress={() => logoff()}>
+          <ContentContainer>
+            <View style={styles.optionContainer}>
+              <View style={styles.optionTextAndIcon}>
+                <Ionicons name="md-power" size={25} color={theme.palette.dark} />
+
+                <View style={styles.optionTextContainer}>
+                  <Typography size="medium" color={theme.palette.dark}>
+                    Sair
+                  </Typography>
+                  <Typography size="caption" color={theme.palette.light}>
+                    Ir para tela de login
+                  </Typography>
+                </View>
+              </View>
+
+              <Ionicons name="ios-arrow-forward" size={25} color={theme.palette.light} />
+            </View>
+          </ContentContainer>
+        </TouchableOpacity>
+        {/* End Sair */}
       </ScreenContainer>
     </React.Fragment>
   )

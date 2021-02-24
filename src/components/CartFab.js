@@ -67,7 +67,7 @@ const CartFab = () => {
       <View style={styles.miniFabContainer}>
         {lista.map(obj => {
           return (
-            <Animated.View style={[
+            <Animated.View key={Math.random(100)} style={[
               styles.miniFab,
               {
                 transform: [
